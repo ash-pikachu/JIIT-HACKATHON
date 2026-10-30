@@ -1,85 +1,71 @@
 {% extends "app_shell.html" %}
-{% block title %}Journey | Prashiksha{% endblock %}
+{% block title %}Journey & Assessment | Prashiksha{% endblock %}
 {% block content %}
 <section class="page-head">
-    <p class="eyebrow">Session Complete</p>
-    <h1>Your learning journey</h1>
-    <p class="page-copy">A comprehensive snapshot of what you practiced, how your understanding changed, and your flashcard performance.</p>
+    <span class="eyebrow">Session Complete</span>
+    <h1>Your Learning Journey</h1>
+    <p class="lead">Great work today! Here is your performance overview, concept mastery, and final assessment report.</p>
 </section>
 
-<section class="stats-grid">
-    <div class="stat"><strong>{{ journey_data.session_duration_minutes }}</strong><span>Minutes</span></div>
-    <div class="stat"><strong>{{ journey_data.messages_exchanged }}</strong><span>Messages</span></div>
-    <div class="stat"><strong>{{ journey_data.quiz_results.accuracy_percent|round }}%</strong><span>Quiz Accuracy</span></div>
-    <div class="stat"><strong>{{ (journey_data.understanding_level * 100)|round }}%</strong><span>Mastery</span></div>
-</section>
+<div class="metrics-grid">
+    <div class="metric-card">
+        <span class="metric-title"><i data-lucide="brain"></i> Mastery Level</span>
+        <div class="metric-value">{{ report.level }}</div>
+        <div class="metric-sub">{{ report.understanding }}% understanding score</div>
+    </div>
+    <div class="metric-card">
+        <span class="metric-title"><i data-lucide="award"></i> Quiz Accuracy</span>
+        <div class="metric-value">{{ report.quiz_accuracy }}%</div>
+        <div class="metric-sub">{{ report.correct }}/{{ report.total }} questions answered correctly</div>
+    </div>
+    <div class="metric-card">
+        <span class="metric-title"><i data-lucide="check-circle-2"></i> Milestones Mastered</span>
+        <div class="metric-value">{{ report.completed_milestones_count }}</div>
+        <div class="metric-sub">of {{ report.total_milestones_count }} roadmap milestones passed</div>
+    </div>
+    <div class="metric-card">
+        <span class="metric-title"><i data-lucide="message-square"></i> Dialogue Exchanges</span>
+        <div class="metric-value">{{ report.chat_count }}</div>
+        <div class="metric-sub">Total learning interactions with AI</div>
+    </div>
+</div>
 
-<!-- Visual Graph Section for Flashcard Results -->
-<section class="journey-graph-card">
-    <div class="graph-header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="graph-icon"><i data-lucide="bar-chart-2"></i></div>
-            <div>
-                <h2>Flashcard Performance Breakdown</h2>
-                <small>Visual graph of all flashcard questions on {{ journey_data.topic }}</small>
-            </div>
+<section class="graph-section">
+    <div class="graph-head">
+        <h2><i data-lucide="trending-up"></i> Quiz Performance & Accuracy Trend</h2>
+        <p>Your score trajectory across each flashcard checkpoint during this session.</p>
+    </div>
+    {% if report.has_graph_data %}
+    <div class="chart-container">
+        <div class="y-axis-labels">
+            <span>100%</span>
+            <span>75%</span>
+            <span>50%</span>
+            <span>25%</span>
+            <span>0%</span>
         </div>
-        <div class="graph-legend">
-            <span class="legend-item"><i class="legend-dot correct"></i> Correct</span>
-            <span class="legend-item"><i class="legend-dot incorrect"></i> Incorrect</span>
+        <div class="chart-bars-wrap">
+            <div class="benchmark-line" title="70% Passing Threshold" style="bottom: 70%;">
+                <span class="benchmark-tag">70% Pass Line</span>
+            </div>
+            {% for item in report.graph_data %}
+            <div class="bar-col">
+                <div class="bar-fill-wrap">
+                    <div class="bar-fill {% if item.score >= 70 %}passed{% else %}below{% endif %}"
+                         style="height: {{ item.score }}%;"
+                         data-score="{{ item.score }}%">
+                        <span class="bar-tooltip">Quiz #{{ item.attempt }}: {{ item.score }}% ({{ item.correct }}/{{ item.total }})</span>
+                    </div>
+                </div>
+                <div class="bar-label">Q{{ item.attempt }}</div>
+            </div>
+            {% endfor %}
         </div>
     </div>
-
-    {% set total_cards = journey_data.quiz_results.total_questions %}
-    {% set correct_cards = journey_data.quiz_results.correct_answers %}
-    {% set incorrect_cards = total_cards - correct_cards %}
-    {% set accuracy = journey_data.quiz_results.accuracy_percent|round %}
-
-    {% if total_cards > 0 %}
-    <div class="graph-visual-container">
-        <!-- Circular Donut Metric -->
-        <div class="donut-chart-box">
-            <div class="donut-chart" style="--correct-pct: {{ (correct_cards / total_cards * 100)|round }}%;">
-                <div class="donut-inner">
-                    <strong>{{ accuracy }}%</strong>
-                    <span>Accuracy</span>
-                </div>
-            </div>
-            <div class="donut-summary">
-                <div class="donut-stat">
-                    <span class="stat-num correct">{{ correct_cards }}</span>
-                    <span class="stat-label">Correct</span>
-                </div>
-                <div class="donut-stat">
-                    <span class="stat-num incorrect">{{ incorrect_cards }}</span>
-                    <span class="stat-label">Incorrect</span>
-                </div>
-                <div class="donut-stat">
-                    <span class="stat-num total">{{ total_cards }}</span>
-                    <span class="stat-label">Total Cards</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Question by Question Bar Graph -->
-        <div class="bars-chart-box">
-            <h3 style="font-size: 15px; margin: 0 0 14px; color: var(--ink);">Question-by-Question Results</h3>
-            <div class="question-bars-list">
-                {% for attempt in journey_data.get("quiz_attempts", []) %}
-                <div class="question-bar-item">
-                    <div class="bar-info">
-                        <span class="bar-q-num">Q{{ loop.index }}</span>
-                        <span class="bar-q-text" title="{{ attempt.question }}">{{ attempt.question }}</span>
-                    </div>
-                    <div class="bar-track">
-                        <div class="bar-fill {{ 'fill-correct' if attempt.is_correct else 'fill-incorrect' }}" style="width: {{ '100%' if attempt.is_correct else '35%' }};">
-                            <span>{{ 'Correct' if attempt.is_correct else 'Incorrect' }}</span>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
+    <div class="chart-legend">
+        <span class="legend-item"><span class="legend-dot pass"></span> Scored &ge; 70% (Passed)</span>
+        <span class="legend-item"><span class="legend-dot below"></span> Below 70% (Needs Review)</span>
+        <span class="legend-item"><span class="legend-line"></span> 70% Milestone Target</span>
     </div>
     {% else %}
     <div class="no-graph-data">
@@ -90,8 +76,8 @@
 </section>
 
 <article class="summary-box">
-    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #7c5cfc; font-weight: 700;">
-        <i data-lucide="sparkles"></i>
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #000000; font-weight: 700;">
+        <i data-lucide="sparkles" style="color: #FFAB00;"></i>
         <span>AI Session Evaluation</span>
     </div>
     {{ summary }}

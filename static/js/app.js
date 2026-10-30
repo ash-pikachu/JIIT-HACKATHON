@@ -22,6 +22,7 @@ function hydrateExistingMessages() {
         const role = [...node.classList].find((item) => ["assistant", "user", "system"].includes(item));
         node.innerHTML = renderMessageContent({ role, content: node.textContent || "" });
     });
+    renderMathInElementSafe(chatWindow);
 }
 
 async function startInitialLesson() {
@@ -83,6 +84,7 @@ function renderMessages(messages, scrollToResponse = true) {
         .map((message) => `<article class="message ${message.role}">${renderMessageContent(message)}</article>`)
         .join("");
     
+    renderMathInElementSafe(chatWindow);
     lucide.createIcons();
 
     if (scrollToResponse) {
@@ -108,6 +110,64 @@ function renderMessageContent(message) {
     return escapeHtml(message.content);
 }
 
+
+// ─── Mathematical Formula Rendering (KaTeX) ──────────────────────────────────
+function renderKatexToString(tex, isDisplay = false) {
+    const rawTex = String(tex || "").trim();
+    if (!rawTex) return "";
+    if (typeof window !== "undefined" && window.katex && typeof window.katex.renderToString === "function") {
+        try {
+            return window.katex.renderToString(rawTex, {
+                displayMode: isDisplay,
+                throwOnError: false
+            });
+        } catch (err) {
+            console.warn("KaTeX string render notice:", err);
+        }
+    }
+    return isDisplay ? `$$${rawTex}$$` : `$${rawTex}$`;
+}
+
+function renderMathInElementSafe(elem) {
+    if (!elem) return;
+    const runRender = () => {
+        if (typeof renderMathInElement === "function") {
+            try {
+                renderMathInElement(elem, {
+                    delimiters: [
+                        { left: "$$", right: "$$", display: true },
+                        { left: "\\[", right: "\\]", display: true },
+                        { left: "$", right: "$", display: false },
+                        { left: "\\(", right: "\\)", display: false }
+                    ],
+                    throwOnError: false,
+                    ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option"]
+                });
+            } catch (err) {
+                console.warn("KaTeX auto-render notice:", err);
+            }
+        }
+    };
+
+    if (typeof renderMathInElement === "function") {
+        runRender();
+    } else {
+        setTimeout(runRender, 50);
+        setTimeout(runRender, 200);
+        setTimeout(runRender, 600);
+    }
+}
+
+// Global hook to ensure all math across the page is rendered after DOM load
+if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElementSafe(document.body);
+    });
+    window.addEventListener("load", () => {
+        renderMathInElementSafe(document.body);
+    });
+}
+
 function formatTutorText(value) {
     const lines = String(value)
         .replaceAll("\r\n", "\n")
@@ -118,41 +178,96 @@ function formatTutorText(value) {
 
     let sectionIndex = 0;
     const parts = lines.map((rawLine) => {
-        const line = rawLine.replace(/^#{1,6}\s*/, "").replace(/^\*{1,2}\s*/, "").replace(/\*{1,2}$/, "").trim();
-        const numbered = line.match(/^(\d+)[.)]\s+(.+)$/);
-        if (numbered) {
-            sectionIndex += 1;
-            const colorClass = `tone-${((sectionIndex - 1) % 4) + 1}`;
-            return `<h3 class="tutor-section-title ${colorClass}"><span>${numbered[1]}</span>${inlineFormat(numbered[2])}</h3>`;
-        }
-
+        // 1. Markdown Headings (#, ##, ###, etc.)
         const markdownHeading = rawLine.match(/^#{1,6}\s+(.+)$/);
         if (markdownHeading) {
             sectionIndex += 1;
+            const headingContent = markdownHeading[1].trim();
             const colorClass = `tone-${((sectionIndex - 1) % 4) + 1}`;
-            return `<h3 class="tutor-section-title ${colorClass}">${inlineFormat(markdownHeading[1])}</h3>`;
+            const numMatch = headingContent.match(/^(\d+)[.)]\s+(.+)$/);
+            if (numMatch) {
+                return `<h3 class="tutor-section-title ${colorClass}"><span class="tutor-section-badge">${numMatch[1]}</span><span class="tutor-section-title-text">${inlineFormat(numMatch[2])}</span></h3>`;
+            }
+            return `<h3 class="tutor-section-title ${colorClass}"><span class="tutor-section-title-text">${inlineFormat(headingContent)}</span></h3>`;
         }
 
-        const bullet = line.match(/^[-*•]\s+(.+)$/);
+        // 2. Numbered explanation points/cards (e.g. 1. "RuBisCO...", 2. ...)
+        const numbered = rawLine.match(/^(\d+)[.)]\s+(.+)$/);
+        if (numbered) {
+            sectionIndex += 1;
+            const colorClass = `tone-${((sectionIndex - 1) % 4) + 1}`;
+            return `<div class="tutor-numbered-item ${colorClass}"><span class="tutor-item-badge">${numbered[1]}</span><div class="tutor-item-body">${inlineFormat(numbered[2])}</div></div>`;
+        }
+
+        // 3. Bullet points (e.g. - item, * item, • item)
+        const bullet = rawLine.match(/^[-*•]\s+(.+)$/);
         if (bullet) {
             return `<div class="tutor-bullet">${inlineFormat(bullet[1])}</div>`;
         }
 
-        const subtopic = line.match(/^([A-Z][A-Za-z0-9 /()&-]{2,54}):\s+(.+)$/);
-        if (subtopic) {
-            return `<p class="tutor-subtopic"><strong>${inlineFormat(subtopic[1])}</strong><span>${inlineFormat(subtopic[2])}</span></p>`;
+        // 4. Blockquotes or callouts (e.g. > Note...)
+        const callout = rawLine.match(/^>\s*(.+)$/);
+        if (callout) {
+            return `<div class="tutor-callout">${inlineFormat(callout[1])}</div>`;
         }
 
-        return `<p>${inlineFormat(line)}</p>`;
+        // 5. Subtopics (e.g. Mechanism: ...)
+        const subtopic = rawLine.match(/^([A-Z][A-Za-z0-9 /()&-]{2,54}):\s+(.+)$/);
+        if (subtopic) {
+            return `<p class="tutor-subtopic"><strong class="tutor-subtopic-label">${inlineFormat(subtopic[1])}</strong><span class="tutor-subtopic-text">${inlineFormat(subtopic[2])}</span></p>`;
+        }
+
+        // 6. Regular paragraph
+        return `<p>${inlineFormat(rawLine)}</p>`;
     });
 
     return `<div class="tutor-content">${parts.join("")}</div>`;
 }
 
 function inlineFormat(value) {
-    return escapeHtml(value)
+    if (value === null || value === undefined) return "";
+    // Pre-normalize escaped dollars from LLM e.g. \$sigma_B^2... -> $sigma_B^2...
+    let cleanVal = String(value)
+        .replace(/\\\$([^$\n]+?)(?:\\\$|\$)/g, "$$$1$")
+        .replace(/\\\$([a-zA-Z0-9_^{}\\+\-*=()]+)/g, "$$$1$$");
+
+    // Extract and render math tokens directly to KaTeX HTML before HTML escaping
+    const mathTokens = [];
+    const saveMathToken = (renderedHtml) => {
+        const id = `@@@KATEX${mathTokens.length}@@@`;
+        mathTokens.push(renderedHtml);
+        return id;
+    };
+
+    // 1. Display math: $$...$$ and \[...\]
+    cleanVal = cleanVal.replace(/\$\$([\s\S]+?)\$\$/g, (_, tex) => saveMathToken(renderKatexToString(tex, true)));
+    cleanVal = cleanVal.replace(/\\\[([\s\S]+?)\\\]/g, (_, tex) => saveMathToken(renderKatexToString(tex, true)));
+
+    // 2. Parentheses math: \(...\)
+    cleanVal = cleanVal.replace(/\\\(([\s\S]+?)\\\)/g, (_, tex) => saveMathToken(renderKatexToString(tex, false)));
+
+    // 3. Inline math: $...$ (ignoring literal currency e.g. $50)
+    cleanVal = cleanVal.replace(/(^|[^\\])\$([^\s$](?:[^$\n]*?[^\s$])?)\$/g, (match, prefix, tex) => {
+        if (/^\d+(?:\.\d+)?$/.test(tex.trim())) {
+            return prefix + '$' + tex + '$';
+        }
+        return prefix + saveMathToken(renderKatexToString(tex, false));
+    });
+
+    // 4. Chemical formulas with subscripts if written as CO_2, O_2, H_2O outside math
+    cleanVal = cleanVal.replace(/\b([A-Z][a-z]?)_(\d+)\b/g, "$1___SUB_$2___");
+
+    let html = escapeHtml(cleanVal)
         .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-        .replace(/\*(.+?)\*/g, "<strong>$1</strong>");
+        .replace(/\*(.+?)\*/g, "<strong>$1</strong>")
+        .replace(/___SUB_(\d+)___/g, "<sub>$1</sub>");
+
+    // Restore rendered KaTeX expressions cleanly
+    mathTokens.forEach((token, i) => {
+        html = html.split(`@@@KATEX${i}@@@`).join(token);
+    });
+
+    return html;
 }
 
 function escapeHtml(value) {
@@ -189,6 +304,67 @@ chatForm?.addEventListener("submit", async (event) => {
 document.querySelector("#quizStart")?.addEventListener("click", openQuiz);
 document.querySelector("#closeQuiz")?.addEventListener("click", () => quizDialog?.close());
 
+function updateUnderstandingBarRealtime(data) {
+    if (!data || data.understanding === undefined) return;
+
+    const percent = Math.round(Number(data.understanding));
+    const levelLabel = data.level_label || (percent >= 70 ? "Expert" : percent >= 35 ? "Average" : "Newbie");
+    const levelHint = data.level_hint || (percent >= 70 ? "Strong mastery" : percent >= 35 ? "Growing steadily" : "Building foundations");
+    const levelIcon = data.level_icon || (percent >= 70 ? "badge-check" : percent >= 35 ? "book-open-check" : "sprout");
+
+    // 1. Sidebar Mastery Progress Bar
+    const bar = document.querySelector("#sidebarMasteryBar");
+    if (bar) {
+        bar.style.width = `${percent}%`;
+        bar.classList.remove("meter-updating");
+        void bar.offsetWidth; // trigger reflow for smooth re-animation
+        bar.classList.add("meter-updating");
+    }
+
+    // 2. Sidebar Mastery Percentage Text
+    const percentEl = document.querySelector("#sidebarMasteryPercent");
+    if (percentEl) {
+        percentEl.textContent = `${percent}%`;
+    }
+
+    // 3. Sidebar Mastery Card level class (level-newbie, level-average, level-expert)
+    const card = document.querySelector("#sidebarMasteryCard");
+    if (card) {
+        card.classList.remove("level-newbie", "level-average", "level-expert");
+        card.classList.add(`level-${levelLabel.toLowerCase()}`);
+    }
+
+    // 4. Sidebar Level Badge Text & Hint
+    const labelEl = document.querySelector("#sidebarMasteryLabel");
+    if (labelEl) labelEl.textContent = levelLabel;
+
+    const hintEl = document.querySelector("#sidebarMasteryHint");
+    if (hintEl) hintEl.textContent = levelHint;
+
+    // 5. Sidebar Icon
+    const iconContainer = document.querySelector("#sidebarMasteryBadge");
+    if (iconContainer) {
+        const iconEl = iconContainer.querySelector("i");
+        if (iconEl) {
+            iconEl.setAttribute("data-lucide", levelIcon);
+            if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") {
+                lucide.createIcons();
+            }
+        }
+    }
+
+    // 6. Sidebar Past Topics Pill for Active Topic
+    const activeTopicForm = document.querySelector(".past-topic-item.active");
+    if (activeTopicForm) {
+        const pill = activeTopicForm.querySelector(".past-topic-pill");
+        if (pill) {
+            pill.textContent = `${percent}%`;
+            pill.classList.remove("newbie", "average", "expert");
+            pill.classList.add(percent >= 70 ? "expert" : percent >= 35 ? "average" : "newbie");
+        }
+    }
+}
+
 async function openQuiz() {
     if (!quizDialog || !quizBody) return;
     quizBody.innerHTML = "<p>Preparing flashcards...</p>";
@@ -199,6 +375,7 @@ async function openQuiz() {
 
 function renderQuiz(data) {
     if (!quizBody) return;
+    updateUnderstandingBarRealtime(data);
     if (data.done) {
         const isRoadmap = Boolean(data.is_roadmap || document.querySelector("#roadmapWrapper"));
         const score = data.score !== undefined ? data.score : 0;
@@ -243,7 +420,7 @@ function renderQuiz(data) {
         } else {
             statusBanner = `
                 <div style="font-size: 32px; margin-bottom: 8px;">🎉</div>
-                <strong style="font-size: 18px; color: #1a0a4e;">Flashcard Session Complete!</strong>
+                <strong style="font-size: 18px; color: #000000;">Flashcard Session Complete!</strong>
             `;
             actionButtons = `
                 <button class="primary-btn" type="button" id="closeQuizDone">Continue Learning</button>
@@ -255,7 +432,7 @@ function renderQuiz(data) {
                 ${statusBanner}
                 <div style="display: flex; justify-content: center; gap: 20px; margin: 16px 0;">
                     <div><strong>${data.correct}/${data.total}</strong><br><small style="color: var(--muted)">Correct</small></div>
-                    <div><strong style="color: ${passed70 ? '#15803d' : '#b45309'}">${score}%</strong><br><small style="color: var(--muted)">Score</small></div>
+                    <div><strong style="color: ${passed70 ? '#FFAB00' : '#2C2C2C'}">${score}%</strong><br><small style="color: var(--muted)">Score</small></div>
                     <div><strong>${data.understanding}%</strong><br><small style="color: var(--muted)">Mastery</small></div>
                 </div>
             </div>
@@ -266,6 +443,7 @@ function renderQuiz(data) {
         document.querySelector("#closeQuizDone")?.addEventListener("click", () => {
             quizDialog?.close();
         });
+        renderMathInElementSafe(quizBody);
         document.querySelector("#retryQuizBtn")?.addEventListener("click", () => {
             openQuiz();
         });
@@ -329,7 +507,7 @@ function renderQuiz(data) {
                             <span class="mcq-select-indicator checkbox">
                                 <i data-lucide="check" style="width: 13px; height: 13px;"></i>
                             </span>
-                            <span class="mcq-opt-text">${escapeHtml(opt)}</span>
+                            <span class="mcq-opt-text">${inlineFormat(opt)}</span>
                         </button>
                     `).join("")}
                 </div>
@@ -346,7 +524,7 @@ function renderQuiz(data) {
                     ${card.options.map(opt => `
                         <button class="mcq-option-btn single-select-btn" type="button" data-val="${escapeHtml(opt)}">
                             <span class="mcq-select-indicator radio"></span>
-                            <span class="mcq-opt-text">${escapeHtml(opt)}</span>
+                            <span class="mcq-opt-text">${inlineFormat(opt)}</span>
                         </button>
                     `).join("")}
                 </div>
@@ -376,7 +554,7 @@ function renderQuiz(data) {
                 </span>
             `) : ""}
         </div>
-        <div class="quiz-question">${escapeHtml(card.question)}</div>
+        <div class="quiz-question">${inlineFormat(card.question)}</div>
 
         <div class="quiz-content-layout" id="quizContentLayout">
             ${optionsHtml}
@@ -444,7 +622,10 @@ function renderQuiz(data) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ answer: selectedLetters.join(", "), answers: selectedLetters, skip: false }),
-            }).then(r => r.json());
+            }).then(r => r.json()).then(resData => {
+                updateUnderstandingBarRealtime(resData);
+                return resData;
+            });
 
             // Highlight options:
             // Any option in correctLetters gets opt-correct
@@ -473,7 +654,7 @@ function renderQuiz(data) {
             const contentLayout = document.querySelector("#quizContentLayout");
 
             const explanationContent = card.explanation || `The correct options are: ${correctLetters.join(", ")}.`;
-            if (explanationText) explanationText.textContent = explanationContent;
+            if (explanationText) { explanationText.innerHTML = inlineFormat(explanationContent); renderMathInElementSafe(explanationText); }
 
             explanationBtn?.addEventListener("click", () => {
                 if (!explanationPanel) return;
@@ -513,7 +694,10 @@ function renderQuiz(data) {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ answer: selectedVal, skip: false }),
-                }).then(r => r.json());
+                }).then(r => r.json()).then(resData => {
+                    updateUnderstandingBarRealtime(resData);
+                    return resData;
+                });
 
                 // Highlight options: STRICT letter matching, NO substring inclusion
                 document.querySelectorAll(".mcq-option-btn.single-select-btn").forEach(b => {
@@ -540,7 +724,7 @@ function renderQuiz(data) {
                 const contentLayout = document.querySelector("#quizContentLayout");
 
                 const explanationContent = card.explanation || `The correct option is ${targetCorrect}.`;
-                if (explanationText) explanationText.textContent = explanationContent;
+                if (explanationText) { explanationText.innerHTML = inlineFormat(explanationContent); renderMathInElementSafe(explanationText); }
 
                 explanationBtn?.addEventListener("click", () => {
                     if (!explanationPanel) return;
@@ -577,6 +761,7 @@ function renderQuiz(data) {
                 body: JSON.stringify({ answer, skip: false }),
             });
             const nextData = await res.json();
+            updateUnderstandingBarRealtime(nextData);
             renderQuiz(nextData);
         });
     }
@@ -621,8 +806,8 @@ function renderRoadmap(roadmapData, currentStep, completedMilestones) {
                 "Key takeaways tested in the 70% flashcard check"
             ];
             const briefItems = Array.isArray(whatWillBe)
-                ? whatWillBe.map(pt => `<li>${escapeHtml(pt)}</li>`).join("")
-                : `<li>${escapeHtml(whatWillBe)}</li>`;
+                ? whatWillBe.map(pt => `<li>${inlineFormat(pt)}</li>`).join("")
+                : `<li>${inlineFormat(whatWillBe)}</li>`;
 
             const cardHtml = `
                 <div class="roadmap-node-card ${statusClass}" data-step-idx="${idx}">
@@ -633,7 +818,7 @@ function renderRoadmap(roadmapData, currentStep, completedMilestones) {
                     <h4 class="node-title">${escapeHtml(step.title || "")}</h4>
                     <div class="node-desc-wrap">
                         <p class="node-desc">
-                            ${escapeHtml(step.content || "")}
+                            ${inlineFormat(step.content || "")}
                             <button class="node-more-btn" type="button" data-step-idx="${idx}">... More</button>
                         </p>
                         <div class="node-brief-drawer" id="nodeBriefDrawer-${idx}" style="display: none;">
@@ -672,6 +857,7 @@ function renderRoadmap(roadmapData, currentStep, completedMilestones) {
         setupRoadmapListeners();
         setupRoadmapArrows();
         lucide.createIcons();
+        renderMathInElementSafe(container);
 
         if (hasActive) {
             const activeCard = container.querySelector(".roadmap-node-card.is-active");
@@ -990,8 +1176,8 @@ function setupTopDockAndPanels() {
                         <span class="drawer-note-cat">${escapeHtml(note.category || 'Concept')}</span>
                         <small class="drawer-note-time">${escapeHtml(note.created_at || 'Just now')}</small>
                     </div>
-                    <h4 class="drawer-note-title">${escapeHtml(note.title)}</h4>
-                    <p class="drawer-note-text">${escapeHtml(note.content)}</p>
+                    <h4 class="drawer-note-title">${inlineFormat(note.title)}</h4>
+                    <p class="drawer-note-text">${inlineFormat(note.content)}</p>
                     <div class="drawer-note-actions">
                         <button type="button" class="drawer-copy-btn" title="Copy text" data-copy="${escapeHtml(note.content)}"><i data-lucide="copy"></i> Copy</button>
                         <button type="button" class="drawer-del-btn" title="Delete note" data-del="${note.id}"><i data-lucide="trash-2"></i></button>

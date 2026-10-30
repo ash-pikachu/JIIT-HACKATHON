@@ -17,7 +17,7 @@
             padding: 16px 20px;
             overflow: hidden;
             font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, #f5f3ff 0%, #fce7f3 50%, #eff6ff 100%);
+            background: #F5F5F5;
             box-sizing: border-box;
         }
 
@@ -82,7 +82,7 @@
             border-radius: 28px;
             overflow: hidden;
             background: white;
-            box-shadow: 0 10px 40px -10px rgba(124,92,252,0.18), 0 30px 80px -15px rgba(124,92,252,0.22), 0 0 0 1px rgba(124,92,252,0.08);
+            border: 1px solid rgba(44, 44, 44, 0.12); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(44, 44, 44, 0.06);
             width: 100%;
             max-width: 1060px;
             max-height: calc(100vh - 32px);
@@ -99,7 +99,7 @@
             flex-shrink: 0;
             padding: 28px 36px 98px 36px;
             overflow: hidden;
-            background: linear-gradient(150deg, #6d44f8 0%, #8b5cf6 35%, #d946ef 70%, #f43f9a 100%);
+            background: linear-gradient(160deg, #000000 0%, #1a1a1a 45%, #2C2C2C 100%);
             color: white;
             user-select: none;
         }
@@ -166,7 +166,7 @@
             gap: 12px;
             margin-bottom: 20px;
             padding-bottom: 14px;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.12);
+            border-bottom: 1px solid rgba(44, 44, 44, 0.12);
         }
 
         .login-panel-brand-badge {
@@ -176,9 +176,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-            border: 1px solid rgba(124, 92, 252, 0.25);
-            box-shadow: 0 4px 14px rgba(124, 92, 252, 0.12);
+            background: #F5F5F5;
+            border: 1px solid rgba(44, 44, 44, 0.18);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             padding: 4px;
             overflow: hidden;
             flex-shrink: 0;
@@ -187,7 +187,7 @@
 
         .login-panel-brand-badge:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(124, 92, 252, 0.22);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
         }
 
         .login-panel-brand-badge img {
@@ -201,16 +201,14 @@
             font-size: 19px;
             font-weight: 800;
             letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #1e1b4b 0%, #4f46e5 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #000000;
             display: block;
             line-height: 1.2;
         }
 
         .login-panel-brand-tag {
             font-size: 11.5px;
-            color: #8b5cf6;
+            color: #666666;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.08em;
@@ -223,7 +221,7 @@
             font-weight: 800;
             line-height: 1.05;
             margin-bottom: 10px;
-            background: linear-gradient(90deg, #ffffff 0%, #e0e7ff 45%, #fbcfe8 100%);
+            background: #FFFFFF;
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -278,7 +276,7 @@
             left: 20px;
             width: 86px;
             height: 104px;
-            background: linear-gradient(160deg, #4f46e5, #3730a3);
+            background: #2C2C2C;
             border-radius: 14px;
             border: 2.5px solid rgba(255,255,255,0.45);
             box-shadow: 0 14px 30px rgba(0,0,0,0.22);
@@ -290,10 +288,10 @@
             left: 88px;
             width: 108px;
             height: 108px;
-            background: linear-gradient(160deg, #ec4899, #be185d);
+            background: #000000;
             border-radius: 50%;
             border: 2.5px solid rgba(255,255,255,0.45);
-            box-shadow: 0 16px 36px rgba(190,24,93,0.42);
+            box-shadow: 0 14px 30px rgba(0,0,0,0.3);
             z-index: 3;
         }
 
@@ -314,7 +312,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            filter: drop-shadow(0 14px 26px rgba(2, 132, 199, 0.38));
+            filter: drop-shadow(0 14px 26px rgba(0, 0, 0, 0.25));
             z-index: 1;
         }
 
@@ -595,7 +593,7 @@
 
         .quote-progress-fill {
             height: 100%;
-            background: white;
+            background: #FFAB00;
             width: 0%;
             animation: quoteProgress 4s linear forwards;
         }
@@ -639,14 +637,14 @@
         .form-title {
             font-size: 26px;
             font-weight: 800;
-            color: #1a0a4e;
+            color: #000000;
             margin-bottom: 4px;
             letter-spacing: -0.02em;
         }
 
         .form-subtitle {
             font-size: 14px;
-            color: #8a84b4;
+            color: #666666;
             margin-bottom: 16px;
         }
 
@@ -669,8 +667,8 @@
             text-transform: uppercase;
         }
 
-        .label-purple { color: #7c5cfc; }
-        .label-pink { color: #f43f9a; }
+        .label-purple { color: #2C2C2C; }
+        .label-pink { color: #2C2C2C; }
 
         .input-wrapper {
             display: flex;
@@ -679,25 +677,25 @@
             border-radius: 12px;
             padding: 10px 14px;
             transition: all 0.20s ease;
-            background: #f7f6fe;
-            border: 1.5px solid rgba(124,92,252,0.16);
+            background: #F5F5F5;
+            border: 1.5px solid rgba(44, 44, 44, 0.16);
         }
 
         .input-wrapper-pink {
-            background: #fff6fa;
-            border: 1.5px solid rgba(244,63,154,0.16);
+            background: #F5F5F5;
+            border: 1.5px solid rgba(44, 44, 44, 0.16);
         }
 
         .input-wrapper:focus-within {
-            border-color: #7c5cfc;
+            border-color: #000000;
             background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(124,92,252,0.14);
+            box-shadow: 0 0 0 3px rgba(255, 171, 0, 0.28);
         }
 
         .input-wrapper-pink:focus-within {
-            border-color: #f43f9a;
+            border-color: #000000;
             background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(244,63,154,0.14);
+            box-shadow: 0 0 0 3px rgba(255, 171, 0, 0.28);
         }
 
         /* Field Error States */
@@ -744,7 +742,7 @@
             border: none;
             outline: none;
             font-size: 15px;
-            color: #1a0a4e;
+            color: #000000;
             font-family: 'Outfit', sans-serif;
             width: 100%;
         }
@@ -753,7 +751,7 @@
             cursor: pointer;
             appearance: none;
             -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237c5cfc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 6px center;
             padding-right: 28px;
@@ -766,11 +764,11 @@
         }
 
         .input-wrapper:focus-within svg {
-            color: #7c5cfc;
+            color: #000000;
         }
 
         .input-wrapper-pink:focus-within svg {
-            color: #f43f9a;
+            color: #000000;
         }
 
         .checkbox-container {
@@ -797,8 +795,8 @@
             width: 18px;
             height: 18px;
             border-radius: 6px;
-            background: #f7f6fe;
-            border: 1.5px solid rgba(124,92,252,0.3);
+            background: #F5F5F5;
+            border: 1.5px solid rgba(44, 44, 44, 0.25);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -809,20 +807,20 @@
         }
 
         .checkbox-container:hover .custom-checkbox {
-            border-color: #7c5cfc;
-            background: #ede9fe;
+            border-color: #000000;
+            background: #F5F5F5;
         }
 
         .checkbox-container input:checked + .custom-checkbox {
-            background: linear-gradient(135deg, #7c5cfc, #6366f1);
-            border-color: #7c5cfc;
-            box-shadow: 0 2px 6px rgba(124,92,252,0.3);
+            background: #000000;
+            border-color: #000000;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
         }
 
         .custom-checkbox svg {
             width: 12px;
             height: 12px;
-            stroke: white;
+            stroke: #FFAB00;
             stroke-width: 3;
             opacity: 0;
             transform: scale(0.5);
@@ -836,18 +834,17 @@
 
         .checkbox-text {
             font-size: 13px;
-            color: #8a84b4;
+            color: #666666;
             transition: color 0.15s ease;
         }
 
         .checkbox-container:hover .checkbox-text {
-            color: #1a0a4e;
+            color: #000000;
         }
 
         .submit-btn {
-            background: linear-gradient(90deg, #7c5cfc, #f43f9a, #818cf8, #7c5cfc);
-            background-size: 300% 100%;
-            animation: shimmerBtn 3s linear infinite;
+            background: #000000;
+            border: 1.5px solid #000000;
             border-radius: 12px;
             padding: 11px 18px;
             font-size: 14.5px;
@@ -896,8 +893,8 @@
         /* Google SSO button */
         .google-btn {
             background: #faf8ff;
-            border: 1.5px solid rgba(124,92,252,0.16);
-            color: #1a0a4e;
+            border: 1.5px solid rgba(44, 44, 44, 0.16);
+            color: #000000;
             border-radius: 12px;
             padding: 10px;
             font-size: 14px;
@@ -914,7 +911,7 @@
         .google-btn:hover {
             transform: translateY(-2px);
             background: #f4f0ff;
-            border-color: #7c5cfc;
+            border-color: #000000;
             box-shadow: 0 8px 24px rgba(124,92,252,0.15);
         }
 
@@ -926,13 +923,13 @@
         .footer-text {
             text-align: center;
             font-size: 13px;
-            color: #8a84b4;
+            color: #666666;
             margin-top: 10px;
         }
 
         .signup-link {
             font-weight: 700;
-            color: #7c5cfc;
+            color: #000000;
             background: none;
             border: none;
             outline: none;
@@ -943,7 +940,7 @@
         }
 
         .signup-link:hover {
-            color: #f43f9a;
+            color: #000000;
             text-decoration: underline;
         }
 

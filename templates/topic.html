@@ -2,7 +2,10 @@
 {% block title %}Choose Topic | Prashiksha{% endblock %}
 {% block content %}
 <section class="page-head">
-    <p class="eyebrow">Welcome back, {{ state.user.name }}</p>
+    <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 8px;">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Prashiksha Logo" width="44" height="44" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); background: #ffffff; padding: 3px; border: 1px solid rgba(44,44,44,0.12);">
+        <p class="eyebrow" style="margin: 0;">Welcome back, {{ state.user.name }}</p>
+    </div>
     <h1>What should we learn today?</h1>
     <p class="page-copy">Pick a topic and Prashiksha will turn it into a focused class with explanations, examples, practice, and flashcards.</p>
 </section>

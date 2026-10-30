@@ -1060,6 +1060,7 @@ def start_quiz():
     state["current_flashcards"] = []
     state["current_card_idx"] = 0
     state["quiz_answers"] = []
+    state["session_initial_understanding"] = state.get("understanding_level", 0.5)
 
     topic_for_quiz = state.get("topic", "General")
     if state.get("response_type") == "roadmap" and state.get("roadmap_data"):
@@ -1197,6 +1198,20 @@ def answer_quiz():
 
     state.setdefault("quiz_answers", []).append({"card": card, **result})
     state["current_card_idx"] = idx + 1
+
+    # Real-time understanding calculation as flashcards are answered
+    scores = [item.get("score", 0.0) for item in state.get("quiz_answers", [])]
+    if scores:
+        baseline = state.setdefault("session_initial_understanding", state.get("understanding_level", 0.5))
+        avg = sum(scores) / len(scores)
+        # Weighted real-time blend: 70% session baseline + 30% current card performance
+        new_level = round(min(max((baseline * 0.7) + (avg * 0.3), 0.0), 1.0), 2)
+        state["understanding_level"] = new_level
+        try:
+            _get_agent(state).understanding_level = new_level
+        except Exception:
+            pass
+
     if state["current_card_idx"] >= len(cards):
         scores = [item.get("score", 0.0) for item in state.get("quiz_answers", [])]
         total = len(state.get("quiz_answers", []))
@@ -1220,7 +1235,6 @@ def answer_quiz():
                         finally:
                             sm.close()
 
-        state["understanding_level"] = _get_agent(state).update_understanding(scores)
         sm = _get_sm()
         if sm and state.get("session_id"):
             try:
@@ -1248,6 +1262,12 @@ def _quiz_payload(state: dict) -> dict:
     cards = state.get("current_flashcards", [])
     idx = state.get("current_card_idx", 0)
     answers = state.get("quiz_answers", [])
+    level = state.get("understanding_level", 0.5)
+    understanding_pct = round(level * 100)
+    level_label = "Expert" if level >= 0.7 else "Average" if level >= 0.35 else "Newbie"
+    level_hint = "Strong mastery" if level >= 0.7 else "Growing steadily" if level >= 0.35 else "Building foundations"
+    level_icon = "badge-check" if level >= 0.7 else "book-open-check" if level >= 0.35 else "sprout"
+
     if idx >= len(cards) and cards:
         total = len(answers)
         avg = sum(item.get("score", 0) for item in answers) / max(total, 1)
@@ -1262,13 +1282,22 @@ def _quiz_payload(state: dict) -> dict:
             "current_roadmap_step": state.get("current_roadmap_step"),
             "completed_milestones": state.get("completed_milestones", []),
             "roadmap_data": state.get("roadmap_data"),
-            "understanding": round(state.get("understanding_level", 0.5) * 100),
+            "understanding": understanding_pct,
+            "understanding_level": level,
+            "level_label": level_label,
+            "level_hint": level_hint,
+            "level_icon": level_icon,
         }
     return {
         "done": False,
         "index": idx,
         "total": len(cards),
         "card": cards[idx] if idx < len(cards) else None,
+        "understanding": understanding_pct,
+        "understanding_level": level,
+        "level_label": level_label,
+        "level_hint": level_hint,
+        "level_icon": level_icon,
     }
 
 
@@ -1339,4 +1368,4 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=5000)

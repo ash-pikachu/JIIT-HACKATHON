@@ -50,19 +50,19 @@
                 </small>
             </div>
         {% endif %}
-        <div class="mastery level-{{ level_label|lower }}">
+        <div class="mastery level-{{ level_label|lower }}" id="sidebarMasteryCard">
             <div class="mastery-top">
                 <span>Understanding</span>
-                <strong>{{ (level * 100)|round }}%</strong>
+                <strong id="sidebarMasteryPercent">{{ (level * 100)|round }}%</strong>
             </div>
-            <div class="level-badge">
-                <i data-lucide="{{ level_icon }}"></i>
+            <div class="level-badge" id="sidebarMasteryBadge">
+                <i data-lucide="{{ level_icon }}" id="sidebarMasteryIcon"></i>
                 <div>
-                    <strong>{{ level_label }}</strong>
-                    <small>{{ level_hint }}</small>
+                    <strong id="sidebarMasteryLabel">{{ level_label }}</strong>
+                    <small id="sidebarMasteryHint">{{ level_hint }}</small>
                 </div>
             </div>
-            <div class="meter"><span style="width: {{ (level * 100)|round }}%"></span></div>
+            <div class="meter"><span id="sidebarMasteryBar" style="width: {{ (level * 100)|round }}%"></span></div>
             <div class="level-scale">
                 <span>Newbie</span>
                 <span>Average</span>
@@ -121,7 +121,7 @@
         <div class="top-floating-dock" id="topFloatingDock">
             <!-- Notifications Button -->
             <button class="dock-btn notifications-fab" id="notificationsFabBtn" type="button" title="Notifications" aria-label="Notifications">
-                <i data-lucide="bell"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
                 <span class="dock-badge notif-badge {% if not unread_notifications_count %}is-hidden{% endif %}" id="notifBadge">
                     {{ unread_notifications_count or 0 }}
                 </span>
@@ -130,7 +130,7 @@
             <!-- Notes Button (hidden when already on full notes page) -->
             {% if request.endpoint != 'notes' %}
             <button class="dock-btn notes-fab-dock" id="notesFabBtn" type="button" title="Study Notes" aria-label="Study notes">
-                <i data-lucide="notebook-pen"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notebook-pen"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg>
                 <span class="dock-badge notes-badge" id="notesBadge">
                     {{ state.notes|length if state.notes else 0 }}
                 </span>
