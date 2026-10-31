@@ -174,11 +174,3 @@ Use the `get_response()` method in `agent.py` — inject API results into the pr
 | `user_progress` | Cross-session mastery score per topic |
 | `roadmap_steps` | Individual steps in roadmap sessions |
 
----
-
-- **Judges love**: Show the adaptive re-teach flow — it's the most impressive feature
-- **Deploy**: Use Streamlit Cloud (free) + PlanetScale (free MySQL) for a live demo
-
----
-
-Built with ❤️ using Python, Streamlit, Google Gemini, MySQL, gTTS, and deep-translator.
