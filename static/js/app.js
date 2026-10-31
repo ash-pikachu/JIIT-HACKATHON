@@ -1750,11 +1750,14 @@ lucide.createIcons();
 const studentClassroomData = {
     student: {
         name: "Pranjal Singh",
+        username: "Pranjal Singh",
+        email: "singh.pranjalabc2020@gmail.com",
         rollNumber: "CSE-2026-084",
-        class: "CSE 2nd Year",
+        class: "CSE 1st Year",
+        classCode: "CSE 1",
         section: "Section A",
         faculty: "Dr. Ananya Sharma",
-        overallMastery: "84.5%",
+        overallMastery: "92.0%",
         topicsStudied: 42,
         studyHours: "38.4 Hours"
     },
@@ -1965,37 +1968,35 @@ const studentClassroomData = {
     },
     assignments: [
         {
-            id: "asgn-1",
-            title: "Problem Set #01: Binary Search Trees & AVL Balancing",
-            subject: "Data Structures & Algorithms",
-            dueDate: "Nov 04, 2026",
-            fileName: "Binary_Search_Trees_Sheet.pdf",
-            fileSize: "1.4 MB",
-            status: "Submitted",
-            grade: "96 / 100",
-            downloadUrl: "/api/teacher/download-assignment/Binary_Search_Trees_Sheet.pdf"
-        },
-        {
-            id: "asgn-2",
-            title: "Problem Set #02: Virtual Memory & Page Replacement",
-            subject: "Operating Systems",
-            dueDate: "Nov 06, 2026",
-            fileName: "Virtual_Memory_Sheet.pdf",
-            fileSize: "1.4 MB",
+            id: "asgn-1793426960600",
+            title: "Problem Set #06: Logic Gates & Boolean Algebra",
+            subject: "Programming & Logic in C++",
+            class: "CSE 1st Year",
+            dueDate: "Nov 20, 2026",
+            faculty: "Dr. Ananya Sharma",
+            instructions: "Design simplified CMOS logic circuits and truth tables for given Boolean expressions.",
+            maxPoints: 100,
+            fileName: "Logic_Gates_Boolean_Algebra_Sheet.pdf",
+            fileSize: "1.2 MB",
+            downloadUrl: "/api/teacher/download-assignment/Logic_Gates_Boolean_Algebra_Sheet.pdf",
             status: "Active",
-            grade: "Pending Review",
-            downloadUrl: "/api/teacher/download-assignment/Virtual_Memory_Sheet.pdf"
+            grade: "Pending Review"
         },
         {
-            id: "asgn-3",
-            title: "Problem Set #03: Pointers & Dynamic Memory in C++",
-            subject: "Fundamentals of Logic & C++",
-            dueDate: "Nov 02, 2026",
+            id: "asgn-4",
+            title: "Problem Set #04: Pointers & Dynamic Memory in C++",
+            subject: "Programming & Logic in C++",
+            class: "CSE 1st Year",
+            dueDate: "Nov 10, 2026",
+            faculty: "Prof. Vikram Malhotra",
+            instructions: "Address sanitization and memory leak debugging with Valgrind. Implement custom smart pointer wrappers.",
+            maxPoints: 100,
             fileName: "Pointers_Dynamic_Memory_Sheet.pdf",
-            fileSize: "1.4 MB",
-            status: "Submitted",
-            grade: "92 / 100",
-            downloadUrl: "/api/teacher/download-assignment/Pointers_Dynamic_Memory_Sheet.pdf"
+            fileSize: "1.0 MB",
+            downloadUrl: "/api/teacher/download-assignment/Pointers_Dynamic_Memory_Sheet.pdf",
+            status: "Graded",
+            grade: "98 / 100",
+            feedback: "Outstanding smart pointer design. Zero memory leaks detected under Valgrind."
         }
     ],
     quizzes: [
@@ -2066,7 +2067,115 @@ const studentClassroomData = {
     ]
 };
 
-function openClassroomDashboard() {
+
+async function syncStudentAssignmentsFromBackend() {
+    try {
+        const studentClass = (studentClassroomData && studentClassroomData.student && studentClassroomData.student.class) || "CSE 1st Year";
+        const studentEmail = (studentClassroomData && studentClassroomData.student && studentClassroomData.student.email) || "singh.pranjalabc2020@gmail.com";
+        
+        // 1. Fetch floated assignments
+        const [asgnRes, subRes] = await Promise.all([
+            fetch(`/api/student/assignments?class=${encodeURIComponent(studentClass)}`),
+            fetch(`/api/student/submissions?student_email=${encodeURIComponent(studentEmail)}`)
+        ]);
+
+        let backendAssignments = [];
+        let backendSubmissions = [];
+
+        if (asgnRes.ok) {
+            const data = await asgnRes.json();
+            if (data && data.success && Array.isArray(data.assignments)) {
+                backendAssignments = data.assignments;
+            }
+        }
+
+        if (subRes.ok) {
+            const sData = await subRes.json();
+            if (sData && sData.success && Array.isArray(sData.submissions)) {
+                backendSubmissions = sData.submissions;
+            }
+        }
+
+        // Check local floating queue if teacher created assignment in same browser
+        try {
+            const savedQueue = localStorage.getItem('prashiksha_floating_queue');
+            if (savedQueue) {
+                const parsed = JSON.parse(savedQueue);
+                if (Array.isArray(parsed)) {
+                    parsed.forEach(item => {
+                        const itemCls = (item.class || "").toLowerCase();
+                        if (itemCls.includes("1") || itemCls.includes("all") || itemCls.includes("cse")) {
+                            if (!backendAssignments.some(b => b.id === item.id || b.title === item.title)) {
+                                backendAssignments.unshift(item);
+                            }
+                        }
+                    });
+                }
+            }
+        } catch (e) {}
+
+        if (backendAssignments.length > 0) {
+            let localSubs = {};
+            try {
+                const prev = localStorage.getItem('prashiksha_student_submissions');
+                if (prev) localSubs = JSON.parse(prev);
+            } catch (e) {}
+
+            // Direct mapping: Replace list so ONLY 1st year assignments are displayed for Pranjal Singh
+            studentClassroomData.assignments = backendAssignments.map(bAsgn => {
+                const bSub = backendSubmissions.find(s => 
+                    String(s.assignmentId) === String(bAsgn.id) || 
+                    String(s.assignmentTitle).toLowerCase().trim() === String(bAsgn.title).toLowerCase().trim()
+                );
+                const lSub = localSubs[bAsgn.id];
+
+                let status = bAsgn.status || "Active";
+                let grade = bAsgn.grade || "Pending Review";
+                let feedback = bAsgn.feedback || "";
+                let submittedFile = bAsgn.submittedFile || null;
+                let submittedDate = bAsgn.submittedDate || null;
+
+                if (bSub) {
+                    status = bSub.status || "Submitted";
+                    grade = bSub.marks || "Pending Review";
+                    feedback = bSub.feedback || "";
+                    submittedFile = bSub.fileName;
+                    submittedDate = bSub.submittedAt;
+                } else if (lSub) {
+                    status = lSub.status || "Submitted";
+                    grade = lSub.grade || "Pending Review";
+                    submittedFile = lSub.fileName;
+                    submittedDate = lSub.submittedAt;
+                }
+
+                return {
+                    id: bAsgn.id,
+                    title: bAsgn.title,
+                    subject: bAsgn.subject,
+                    class: bAsgn.class || bAsgn.target_class || studentClass,
+                    dueDate: bAsgn.dueDate || "Nov 05, 2026",
+                    faculty: bAsgn.faculty || "Dr. Ananya Sharma",
+                    instructions: bAsgn.instructions || "",
+                    maxPoints: bAsgn.maxPoints || 100,
+                    fileName: bAsgn.fileName,
+                    fileSize: bAsgn.fileSize || "1.2 MB",
+                    downloadUrl: bAsgn.downloadUrl || `/api/teacher/download-assignment/${encodeURIComponent(bAsgn.fileName)}`,
+                    status: status,
+                    grade: grade,
+                    feedback: feedback,
+                    submittedFile: submittedFile,
+                    submittedDate: submittedDate
+                };
+            });
+
+            renderStudentAssignments();
+        }
+    } catch (err) {
+        console.warn("Could not sync student assignments from backend:", err);
+    }
+}
+
+async function openClassroomDashboard() {
     const modal = document.getElementById("classroomFullscreenDashboard");
     if (!modal) return;
 
@@ -2093,12 +2202,31 @@ function openClassroomDashboard() {
                 });
             }
         }
+
+        // Load submitted assignments from localStorage
+        const savedSubmissions = localStorage.getItem('prashiksha_student_submissions');
+        if (savedSubmissions) {
+            const subs = JSON.parse(savedSubmissions);
+            if (subs && typeof subs === 'object') {
+                studentClassroomData.assignments.forEach(asgn => {
+                    if (subs[asgn.id]) {
+                        asgn.status = "Submitted";
+                        asgn.submittedFile = subs[asgn.id].fileName;
+                        asgn.submittedDate = subs[asgn.id].submittedAt;
+                        if (!asgn.grade || asgn.grade === "Pending Review") {
+                            asgn.grade = subs[asgn.id].grade || "Pending Review";
+                        }
+                    }
+                });
+            }
+        }
     } catch (e) {
         console.warn("Could not load floated assignments", e);
     }
 
     renderStudentSyllabus();
     renderStudentAssignments();
+    await syncStudentAssignmentsFromBackend();
     renderStudentQuizzes();
     renderStudentProgress();
     renderStudentResults();
@@ -2140,6 +2268,10 @@ function switchClassroomTab(tabName) {
             view.classList.remove("active");
         }
     });
+
+    if (tabName === "assignments") {
+        syncStudentAssignmentsFromBackend();
+    }
 
     if (window.lucide && typeof window.lucide.createIcons === "function") {
         window.lucide.createIcons();
@@ -2249,32 +2381,311 @@ function renderStudentSyllabus() {
 }
 
 
+
+// ====================================================================
+// STUDENT ASSIGNMENT SUBMISSION & UPLOAD CONTROLLER
+// ====================================================================
+let activeUploadAssignmentId = null;
+let selectedSubmissionFile = null;
+
 function renderStudentAssignments() {
     const container = document.getElementById("studentAssignmentsList");
     if (!container) return;
 
-    container.innerHTML = studentClassroomData.assignments.map(asgn => `
-        <div class="student-asgn-card">
-            <div style="flex: 1; min-width: 260px;">
-                <div class="flex-row-gap" style="margin-bottom: 4px;">
-                    <span class="code-pill">${asgn.subject}</span>
-                    <span style="font-size: 11px; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 9999px;">Floated by Dr. Ananya Sharma</span>
+    const totalCount = studentClassroomData.assignments.length;
+    const submittedCount = studentClassroomData.assignments.filter(a => a.status === "Submitted").length;
+    const pendingCount = totalCount - submittedCount;
+
+    const totalEl = document.getElementById("asgnTotalCount");
+    const subEl = document.getElementById("asgnSubmittedCount");
+    const pendEl = document.getElementById("asgnPendingCount");
+    if (totalEl) totalEl.textContent = totalCount;
+    if (subEl) subEl.textContent = submittedCount;
+    if (pendEl) pendEl.textContent = pendingCount;
+
+    container.innerHTML = studentClassroomData.assignments.map(asgn => {
+        const isSubmitted = asgn.status === "Submitted" || asgn.status === "Graded";
+        const isGraded = asgn.status === "Graded" && asgn.grade && asgn.grade !== "Pending Review";
+        return `
+            <div class="student-asgn-card">
+                <div style="flex: 1; min-width: 260px;">
+                    <div class="flex-row-gap" style="margin-bottom: 6px; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span class="code-pill">${asgn.subject}</span>
+                            <span class="credits-pill">${asgn.class || 'CSE 2nd Year'}</span>
+                        </div>
+                        ${isGraded
+                            ? `<span class="asgn-status-badge submitted" style="background: #dcfce7; color: #15803d; border-color: #86efac;"><i data-lucide="award" style="width: 12px; height: 12px;"></i> Graded: ${asgn.grade}</span>`
+                            : (isSubmitted
+                                ? `<span class="asgn-status-badge pending" style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> Submitted &bull; Pending Review</span>`
+                                : `<span class="asgn-status-badge pending"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> Pending Submission</span>`
+                              )
+                        }
+                    </div>
+                    <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 4px 0 6px;">${asgn.title}</h4>
+                    <div style="font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                        <span>Due Date: <strong>${asgn.dueDate}</strong></span>
+                        <span>Faculty: <strong>${asgn.faculty || 'Dr. Ananya Sharma'}</strong></span>
+                        <span>Max Points: <strong>${asgn.maxPoints || 100} pts</strong></span>
+                        <span>Problem Sheet: <strong>${asgn.fileName}</strong> (${asgn.fileSize || '1.4 MB'})</span>
+                    </div>
+
+                    ${asgn.instructions ? `
+                        <div style="font-size: 12px; color: #334155; margin-top: 8px; background: #f8fafc; padding: 7px 12px; border-radius: 8px; border-left: 3px solid #3b82f6; line-height: 1.45;">
+                            <strong style="color: #1e40af;"><i data-lucide="info" style="width: 12px; height: 12px; vertical-align: middle;"></i> Teacher Instructions:</strong> ${asgn.instructions}
+                        </div>
+                    ` : ''}
+
+                    ${isSubmitted || isGraded ? `
+                        <div class="submission-meta-row" style="${isGraded ? 'background: #f0fdf4; border-color: #86efac;' : ''}">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <i data-lucide="file-check" style="width: 14px; height: 14px; color: #059669;"></i>
+                                <span>Uploaded Solution: <strong>${asgn.submittedFile || 'Solution_' + asgn.id + '.pdf'}</strong></span>
+                            </div>
+                            <span style="font-size: 12px; font-weight: 800; color: ${isGraded ? '#15803d' : '#059669'};">
+                                ${isGraded ? 'Teacher Marks: ' + asgn.grade : 'Status: ' + (asgn.grade || 'Pending Evaluation')}
+                            </span>
+                        </div>
+
+                        ${isGraded && asgn.feedback ? `
+                            <div style="font-size: 12px; color: #064e3b; margin-top: 6px; background: #ecfdf5; padding: 7px 12px; border-radius: 8px; border-left: 3px solid #10b981; line-height: 1.45;">
+                                <strong style="color: #047857;"><i data-lucide="award" style="width: 13px; height: 13px; vertical-align: middle;"></i> Dr. Ananya Sharma's Feedback:</strong> "${asgn.feedback}"
+                            </div>
+                        ` : ''}
+                    ` : ''}
                 </div>
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 4px 0;">${asgn.title}</h4>
-                <div style="font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 12px;">
-                    <span>Due: <strong>${asgn.dueDate}</strong></span>
-                    <span>File: <strong>${asgn.fileName}</strong> (${asgn.fileSize})</span>
+
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <a href="${asgn.downloadUrl || ('/api/teacher/download-assignment/' + encodeURIComponent(asgn.fileName))}" download="${asgn.fileName}" class="asgn-dl-btn" title="Download problem sheet from raw data/assignment/">
+                        <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+                        <span>Download Sheet</span>
+                    </a>
+                    ${isSubmitted ? `
+                        <button type="button" class="asgn-reupload-btn" onclick="openAssignmentUploadModal('${asgn.id}')" title="Re-upload or update your submitted solution">
+                            <i data-lucide="refresh-cw" style="width: 13px; height: 13px;"></i>
+                            <span>Re-upload Solution</span>
+                        </button>
+                    ` : `
+                        <button type="button" class="asgn-upload-btn" onclick="openAssignmentUploadModal('${asgn.id}')" title="Upload your solved assignment file">
+                            <i data-lucide="upload-cloud" style="width: 14px; height: 14px;"></i>
+                            <span>Upload File</span>
+                        </button>
+                    `}
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <a href="${asgn.downloadUrl}" download="${asgn.fileName}" class="asgn-dl-btn" title="Download from raw data/assignment/">
-                    <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-                    <span>Download Sheet</span>
-                </a>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+    }
 }
+
+function openAssignmentUploadModal(asgnId) {
+    const modal = document.getElementById("studentAssignmentUploadModal");
+    if (!modal) return;
+
+    activeUploadAssignmentId = asgnId;
+    selectedSubmissionFile = null;
+
+    const asgn = studentClassroomData.assignments.find(a => a.id === asgnId) || {
+        title: "Assignment Submission",
+        subject: "Computer Science"
+    };
+
+    const titleEl = document.getElementById("uploadModalAsgnTitle");
+    const subjEl = document.getElementById("uploadModalSubject");
+    const previewCard = document.getElementById("uploadFilePreviewCard");
+    const dropzone = document.getElementById("studentAssignmentDropzone");
+    const statusBanner = document.getElementById("studentUploadStatusBanner");
+    const commentsEl = document.getElementById("studentSubmissionComments");
+    const fileInput = document.getElementById("studentAssignmentFileInput");
+
+    if (titleEl) titleEl.textContent = asgn.title;
+    if (subjEl) subjEl.textContent = asgn.subject;
+    if (previewCard) previewCard.classList.add("hidden");
+    if (dropzone) dropzone.classList.remove("hidden");
+    if (statusBanner) {
+        statusBanner.className = "hidden upload-status-strip";
+        statusBanner.textContent = "";
+    }
+    if (commentsEl) commentsEl.value = "";
+    if (fileInput) fileInput.value = "";
+
+    // Setup drag and drop events
+    if (dropzone && !dropzone.dataset.dndInit) {
+        dropzone.dataset.dndInit = "true";
+        ["dragenter", "dragover"].forEach(evtName => {
+            dropzone.addEventListener(evtName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.add("dragover");
+            });
+        });
+        ["dragleave", "drop"].forEach(evtName => {
+            dropzone.addEventListener(evtName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove("dragover");
+            });
+        });
+        dropzone.addEventListener("drop", (e) => {
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                setSubmissionSelectedFile(files[0]);
+            }
+        });
+    }
+
+    modal.style.display = "flex";
+    modal.classList.remove("hidden");
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+    }
+}
+
+function closeAssignmentUploadModal() {
+    const modal = document.getElementById("studentAssignmentUploadModal");
+    if (modal) {
+        modal.style.display = "none";
+        modal.classList.add("hidden");
+    }
+    selectedSubmissionFile = null;
+    activeUploadAssignmentId = null;
+}
+
+function handleAssignmentFileSelect(e) {
+    if (e.target.files && e.target.files.length > 0) {
+        setSubmissionSelectedFile(e.target.files[0]);
+    }
+}
+
+function setSubmissionSelectedFile(file) {
+    selectedSubmissionFile = file;
+    const previewCard = document.getElementById("uploadFilePreviewCard");
+    const dropzone = document.getElementById("studentAssignmentDropzone");
+    const nameEl = document.getElementById("previewFileName");
+    const sizeEl = document.getElementById("previewFileSize");
+
+    if (nameEl) nameEl.textContent = file.name;
+    if (sizeEl) {
+        const sizeKb = file.size / 1024;
+        sizeEl.textContent = sizeKb > 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(sizeKb))} KB`;
+    }
+
+    if (dropzone) dropzone.classList.add("hidden");
+    if (previewCard) previewCard.classList.remove("hidden");
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+    }
+}
+
+function clearSelectedAssignmentFile(e) {
+    if (e) e.stopPropagation();
+    selectedSubmissionFile = null;
+    const fileInput = document.getElementById("studentAssignmentFileInput");
+    if (fileInput) fileInput.value = "";
+
+    const previewCard = document.getElementById("uploadFilePreviewCard");
+    const dropzone = document.getElementById("studentAssignmentDropzone");
+    if (previewCard) previewCard.classList.add("hidden");
+    if (dropzone) dropzone.classList.remove("hidden");
+}
+
+async function submitStudentAssignment() {
+    if (!selectedSubmissionFile) {
+        alert("Please select or drop an assignment file to submit.");
+        return;
+    }
+
+    const submitBtn = document.getElementById("btnSubmitStudentAssignment");
+    const statusBanner = document.getElementById("studentUploadStatusBanner");
+    const commentsEl = document.getElementById("studentSubmissionComments");
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i data-lucide="loader" style="width: 14px; height: 14px;" class="animate-spin"></i> <span>Uploading solution...</span>`;
+    }
+    if (window.lucide) window.lucide.createIcons();
+
+    const formData = new FormData();
+    formData.append("file", selectedSubmissionFile);
+    formData.append("assignment_id", activeUploadAssignmentId || "");
+    formData.append("student_name", "Pranjal Singh");
+    formData.append("roll_number", "CSE-2026-084");
+    formData.append("student_email", "singh.pranjalabc2020@gmail.com");
+    formData.append("class", (studentClassroomData && studentClassroomData.student && studentClassroomData.student.class) || "CSE 1st Year");
+    if (commentsEl) formData.append("comments", commentsEl.value.trim());
+
+    try {
+        const response = await fetch("/api/student/upload-assignment", {
+            method: "POST",
+            body: formData
+        });
+
+        const resData = await response.json();
+        if (response.ok && resData.success) {
+            // Update local memory
+            const asgn = studentClassroomData.assignments.find(a => a.id === activeUploadAssignmentId);
+            if (asgn) {
+                asgn.status = "Submitted";
+                asgn.submittedFile = resData.fileName || selectedSubmissionFile.name;
+                asgn.submittedDate = resData.submittedAt;
+                asgn.grade = "Pending Review";
+            }
+
+            // Persist to localStorage
+            try {
+                let subs = {};
+                const prev = localStorage.getItem("prashiksha_student_submissions");
+                if (prev) subs = JSON.parse(prev);
+                subs[activeUploadAssignmentId] = {
+                    fileName: resData.fileName || selectedSubmissionFile.name,
+                    submittedAt: resData.submittedAt,
+                    fileSize: resData.fileSize,
+                    grade: "Pending Review"
+                };
+                localStorage.setItem("prashiksha_student_submissions", JSON.stringify(subs));
+            } catch (err) {
+                console.warn("Could not save to localStorage", err);
+            }
+
+            // Show success message
+            if (statusBanner) {
+                statusBanner.className = "upload-status-strip success";
+                statusBanner.innerHTML = `<i data-lucide="check-circle" style="width: 14px; height: 14px; vertical-align: middle;"></i> Solution "${resData.fileName || selectedSubmissionFile.name}" submitted successfully! Dr. Ananya Sharma has been notified.`;
+                statusBanner.classList.remove("hidden");
+                if (window.lucide) window.lucide.createIcons();
+            }
+
+            renderStudentAssignments();
+
+            setTimeout(() => {
+                closeAssignmentUploadModal();
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<i data-lucide="send"></i> <span>Submit Assignment</span>`;
+                }
+            }, 1200);
+
+        } else {
+            throw new Error(resData.error || "Submission failed");
+        }
+    } catch (err) {
+        console.error("Upload error:", err);
+        if (statusBanner) {
+            statusBanner.className = "upload-status-strip error";
+            statusBanner.textContent = `Upload failed: ${err.message || 'Server error. Please try again.'}`;
+            statusBanner.classList.remove("hidden");
+        }
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i data-lucide="send"></i> <span>Submit Assignment</span>`;
+        }
+    }
+}
+
 
 function renderStudentQuizzes() {
     const container = document.getElementById("studentQuizzesList");

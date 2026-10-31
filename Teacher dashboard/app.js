@@ -42,6 +42,24 @@ const dashboardData = {
   ],
   students: [
     {
+      id: "std-00",
+      name: "Pranjal Singh",
+      username: "Pranjal Singh",
+      email: "singh.pranjalabc2020@gmail.com",
+      rollNumber: "CSE-2026-084",
+      initial: "P",
+      class: "CSE 1st Year",
+      score: 92,
+      status: "Excellent",
+      attendance: "96%",
+      assignmentsCompleted: "14/14",
+      lastSubmitted: "Oct 30, 2026",
+      strengths: "System Architecture, Data Structures, Algorithmic Logic",
+      weakness: "Complex Graph Reductions",
+      aiRecommendation: "Exemplary student in CSE 1st Year (CSE 1); active participant in Prashiksha modules.",
+      radar: [92, 90, 95, 88, 94]
+    },
+    {
       id: "std-01",
       name: "Aarav Sharma",
       initial: "A",
@@ -1468,6 +1486,8 @@ function switchTab(tabName) {
     renderQuizzesList();
   } else if (tabName === 'assignments') {
     renderAssignmentsList();
+  } else if (tabName === 'pending-assignments') {
+    renderPendingAssignmentsCheckView();
   } else if (tabName === 'home') {
     setTimeout(() => {
       initPerformanceTrendChart(currentTrendFilter);
@@ -1729,7 +1749,7 @@ const PrashikshaDataBridge = {
       status: baseStudent.status,
       attendance: baseStudent.attendance,
       assignmentsCompleted: baseStudent.assignmentsCompleted,
-      email: `${baseStudent.name.toLowerCase().replace(/\s+/g, '.')}@prashiksha.edu`,
+      email: baseStudent.email || `${baseStudent.name.toLowerCase().replace(/\s+/g, '.')}@prashiksha.edu`,
       aiOverview: baseStudent.aiRecommendation,
       totalHours: (28 + (score * 0.15)).toFixed(1) + 'h',
       topicsCount: 20,
@@ -2095,6 +2115,9 @@ function openStudentFullDashboard(studentId) {
 
   // 5. Render Subject Cards with the "View Studied Topics & Activity" Button
   renderStudentSubjectCards(student);
+
+  // 5b. Render Student's Submitted Assignments & Evaluated Marks
+  renderStudentSubmissionsInDetail(student.id, student.name);
 
   // 6. Render Categorized Graphs
   setTimeout(() => {
@@ -2639,6 +2662,8 @@ function loadAssignmentsData() {
     }
   }
 
+
+
   // Ensure default items have rich attributes
   dashboardData.assignments = dashboardData.assignments.map((asgn, idx) => ({
     id: asgn.id || `asgn-legacy-${idx}`,
@@ -2700,6 +2725,29 @@ function loadAssignmentsData() {
     ],
     floatedToPrashiksha: true
   }));
+
+  // Sync real-time with raw data/assignment/assignments_registry.json
+  syncTeacherAssignmentsFromBackend();
+}
+
+async function syncTeacherAssignmentsFromBackend() {
+  try {
+    const res = await fetch("/api/teacher/assignments");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.assignments) && data.assignments.length > 0) {
+        dashboardData.assignments = data.assignments;
+        if (typeof renderAssignmentsList === "function") {
+          renderAssignmentsList(currentAssignmentFilter);
+        }
+        try {
+          localStorage.setItem('disha_assignments', JSON.stringify(dashboardData.assignments));
+        } catch (e) {}
+      }
+    }
+  } catch (err) {
+    console.warn("Could not sync assignments from /api/teacher/assignments:", err);
+  }
 }
 
 // Initial load
@@ -2844,10 +2892,12 @@ function renderAssignmentsList(filter = currentAssignmentFilter) {
               ${asgn.status}
             </span>
             <button 
-              onclick="showToast('Opening grading queue on Prashiksha for ${asgn.title}!')" 
-              class="btn-view text-xs font-semibold whitespace-nowrap"
+              onclick="openAssignmentSubmissions('${asgn.id}')" 
+              class="btn-view text-xs font-bold whitespace-nowrap bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-300 transition"
+              title="Review student solution files and give marks"
             >
-              Grade Submissions
+              <i data-lucide="check-square" class="w-3.5 h-3.5 inline mr-1"></i>
+              <span>Grade Submissions</span>
             </button>
           </div>
 
@@ -3040,6 +3090,500 @@ function removeSelectedAssignmentFile() {
 }
 
 // Submit Create and Float Assignment
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TEACHER ASSIGNMENT SUBMISSIONS & GRADING ENGINE (CLASSES & ASSIGNMENT NAMES)
+// ═══════════════════════════════════════════════════════════════════════════
+
+let currentAssignmentSubtab = 'floated';
+let currentSubmissionsFilterClass = 'All';
+let currentSubmissionsFilterAsgn = 'All';
+
+function switchAssignmentSubtab(subtab) {
+  currentAssignmentSubtab = subtab;
+  const btnFloated = document.getElementById("asgnSubtabFloated");
+  const btnSubmissions = document.getElementById("asgnSubtabSubmissions");
+  const listContainer = document.getElementById("assignmentsListContainer");
+  const filterRow = document.getElementById("assignmentFloatedFilterRow");
+  const subsContainer = document.getElementById("assignmentsSubmissionsContainer");
+
+  if (subtab === 'floated') {
+    if (btnFloated) {
+      btnFloated.className = "px-4 py-2 rounded-lg text-xs font-bold transition bg-white text-slate-900 shadow-xs";
+    }
+    if (btnSubmissions) {
+      btnSubmissions.className = "px-4 py-2 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900";
+    }
+    if (listContainer) listContainer.classList.remove("hidden");
+    if (filterRow) filterRow.classList.remove("hidden");
+    if (subsContainer) subsContainer.classList.add("hidden");
+    renderAssignmentsList(currentAssignmentFilter);
+  } else {
+    if (btnFloated) {
+      btnFloated.className = "px-4 py-2 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900";
+    }
+    if (btnSubmissions) {
+      btnSubmissions.className = "px-4 py-2 rounded-lg text-xs font-bold transition bg-white text-slate-900 shadow-xs";
+    }
+    if (listContainer) listContainer.classList.add("hidden");
+    if (filterRow) filterRow.classList.add("hidden");
+    if (subsContainer) subsContainer.classList.remove("hidden");
+    renderSubmissionsGradingView(currentSubmissionsFilterClass);
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function openAssignmentSubmissions(assignmentId) {
+  currentSubmissionsFilterAsgn = assignmentId || 'All';
+  switchAssignmentSubtab('submissions');
+}
+
+async function renderSubmissionsGradingView(filterClass = 'All') {
+  currentSubmissionsFilterClass = filterClass;
+  const container = document.getElementById("assignmentsSubmissionsContainer");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="p-8 text-center text-slate-400">
+      <i data-lucide="loader" class="w-7 h-7 mx-auto animate-spin mb-2 text-blue-600"></i>
+      <div class="text-xs font-semibold">Loading student submissions from raw data/assignment/submissions/...</div>
+    </div>
+  `;
+  if (window.lucide) window.lucide.createIcons();
+
+  let submissions = [];
+  try {
+    const res = await fetch("/api/teacher/submissions");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.submissions)) {
+        submissions = data.submissions;
+      }
+    }
+  } catch (err) {
+    console.warn("Could not load submissions from server:", err);
+  }
+
+  // Update badge count
+  const badgeEl = document.getElementById("badgeSubmissionsCount");
+  if (badgeEl) {
+    badgeEl.textContent = `${submissions.length} Submissions`;
+  }
+
+  // Filter submissions by class if chosen
+  let filtered = submissions;
+  if (filterClass !== 'All') {
+    filtered = filtered.filter(s => {
+      const c = (s.class || "").toLowerCase();
+      const fc = filterClass.toLowerCase();
+      return c.includes(fc) || ("1" in fc && c.includes("1"));
+    });
+  }
+
+  // If specific assignment filtered
+  if (currentSubmissionsFilterAsgn !== 'All') {
+    filtered = filtered.filter(s => strMatch(s.assignmentId, currentSubmissionsFilterAsgn));
+  }
+
+  // Group submissions by Class and then Assignment
+  const classesList = ["CSE 1st Year", "CSE 2nd Year", "CSE 3rd Year"];
+
+  // Helper matching
+  function strMatch(a, b) {
+    if (!a || !b) return false;
+    return String(a).toLowerCase().trim() === String(b).toLowerCase().trim();
+  }
+
+  let html = `
+    <!-- Top Filter Controls Bar -->
+    <div class="p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-bold text-slate-700 mr-1"><i data-lucide="filter" class="w-3.5 h-3.5 inline mr-1"></i> Class:</span>
+        <button onclick="renderSubmissionsGradingView('All')" class="btn-view ${filterClass === 'All' ? 'bg-slate-900 text-white font-bold' : ''}">All Classes (${submissions.length})</button>
+        <button onclick="renderSubmissionsGradingView('CSE 1st Year')" class="btn-view ${filterClass === 'CSE 1st Year' ? 'bg-slate-900 text-white font-bold' : ''}">CSE 1st Year (CSE 1)</button>
+        <button onclick="renderSubmissionsGradingView('CSE 2nd Year')" class="btn-view ${filterClass === 'CSE 2nd Year' ? 'bg-slate-900 text-white font-bold' : ''}">CSE 2nd Year</button>
+        <button onclick="renderSubmissionsGradingView('CSE 3rd Year')" class="btn-view ${filterClass === 'CSE 3rd Year' ? 'bg-slate-900 text-white font-bold' : ''}">CSE 3rd Year</button>
+      </div>
+
+      ${currentSubmissionsFilterAsgn !== 'All' ? `
+        <button onclick="openAssignmentSubmissions('All')" class="btn-view text-xs text-rose-600 border border-rose-200 hover:bg-rose-50 flex items-center gap-1">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          <span>Clear Assignment Filter</span>
+        </button>
+      ` : ''}
+    </div>
+  `;
+
+  if (filtered.length === 0) {
+    html += `
+      <div class="dashboard-card p-12 text-center text-slate-400">
+        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-40 text-blue-500"></i>
+        <h3 class="text-base font-bold text-slate-700">No student submissions in this view yet</h3>
+        <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">When students (such as Pranjal Singh in CSE 1) upload and submit solutions via Prashiksha Classroom, they will appear here arranged by their class and assignment name.</p>
+      </div>
+    `;
+    container.innerHTML = html;
+    if (window.lucide) window.lucide.createIcons();
+    return;
+  }
+
+  // Organize by Class -> Assignment Name
+  const grouped = {};
+  filtered.forEach(sub => {
+    const cls = sub.class || "CSE 1st Year";
+    const asgnTitle = sub.assignmentTitle || `Assignment ${sub.assignmentId || 'General'}`;
+    if (!grouped[cls]) grouped[cls] = {};
+    if (!grouped[cls][asgnTitle]) grouped[cls][asgnTitle] = [];
+    grouped[cls][asgnTitle].push(sub);
+  });
+
+  // Render each class group
+  Object.keys(grouped).forEach(clsName => {
+    html += `
+      <div class="space-y-4 pt-1">
+        <div class="flex items-center gap-2.5 pb-1 border-b border-slate-200">
+          <span class="w-3 h-3 rounded-full bg-blue-600"></span>
+          <h3 class="text-base font-extrabold text-slate-900 tracking-tight">${clsName}</h3>
+          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Enrolled Batch</span>
+        </div>
+    `;
+
+    const assignmentsInClass = grouped[clsName];
+    Object.keys(assignmentsInClass).forEach(asgnName => {
+      const studentSubs = assignmentsInClass[asgnName];
+      html += `
+        <div class="dashboard-card p-5 border border-slate-200/90 shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div>
+              <div class="text-[11px] font-bold uppercase tracking-wider text-blue-600">Assignment Problem Set</div>
+              <h4 class="text-base font-bold text-slate-900">${asgnName}</h4>
+            </div>
+            <div class="text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">
+              ${studentSubs.length} Student Submission${studentSubs.length > 1 ? 's' : ''} Received
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            ${studentSubs.map(s => {
+              const isGraded = s.status === "Graded" && s.marks && s.marks !== "Pending Review";
+              return `
+                <div class="p-4 rounded-xl border ${isGraded ? 'border-emerald-200/90 bg-emerald-50/20' : 'border-slate-200 bg-slate-50/50'} flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition hover:border-blue-400">
+                  
+                  <!-- Student Info & Solution File -->
+                  <div class="flex items-start gap-3.5 flex-1 min-w-[280px]">
+                    <div class="avatar-initial w-11 h-11 text-base font-bold shrink-0 bg-blue-600 text-white shadow-xs">
+                      ${s.studentName ? s.studentName.charAt(0) : 'S'}
+                    </div>
+                    <div class="space-y-1">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="font-bold text-[14px] text-slate-900">${s.studentName}</span>
+                        <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">${s.rollNumber || 'CSE-2026-084'}</span>
+                        <span class="text-xs text-slate-400">${s.studentEmail || 'singh.pranjalabc2020@gmail.com'}</span>
+                      </div>
+                      
+                      <!-- Attached Solution Pill -->
+                      <div class="flex items-center gap-2.5 pt-1 flex-wrap">
+                        <a 
+                          href="${s.downloadUrl || ('/api/student/download-submission/' + encodeURIComponent(s.fileName))}" 
+                          download="${s.fileName}"
+                          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-slate-200 hover:border-blue-500 text-xs font-bold text-blue-700 shadow-2xs hover:bg-blue-50 transition"
+                          title="Download student solution file"
+                        >
+                          <i data-lucide="file-check" class="w-3.5 h-3.5 text-blue-600"></i>
+                          <span>${s.fileName}</span>
+                          <span class="text-[10.5px] text-slate-400 font-mono">(${s.fileSize || '1.4 MB'})</span>
+                          <i data-lucide="download" class="w-3 h-3 text-blue-500"></i>
+                        </a>
+
+                        <span class="text-[11px] text-slate-400 font-medium">Submitted: <strong>${s.submittedAt}</strong></span>
+                      </div>
+
+                      ${s.comments ? `
+                        <div class="text-[11.5px] text-slate-600 italic bg-white/70 p-2 rounded-lg border border-slate-100 mt-1.5">
+                          "${s.comments}"
+                        </div>
+                      ` : ''}
+                    </div>
+                  </div>
+
+                  <!-- Grading Controls & Marks -->
+                  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-200/70">
+                    
+                    <!-- Marks Input -->
+                    <div class="flex items-center gap-1.5 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-2xs">
+                      <label class="text-[11px] font-bold uppercase text-slate-500">Marks:</label>
+                      <input 
+                        type="number" 
+                        id="grade-marks-${s.id}" 
+                        value="${s.scoreNum !== null && s.scoreNum !== undefined ? s.scoreNum : (s.marks ? parseInt(s.marks) || '' : '')}"
+                        placeholder="95" 
+                        min="0" 
+                        max="${s.maxMarks || 100}"
+                        class="w-14 text-center font-extrabold text-sm text-slate-900 border border-slate-200 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                      />
+                      <span class="text-xs font-bold text-slate-500">/ ${s.maxMarks || 100}</span>
+                    </div>
+
+                    <!-- Teacher Feedback Input -->
+                    <div class="w-full sm:w-56">
+                      <input 
+                        type="text" 
+                        id="grade-feedback-${s.id}" 
+                        value="${s.feedback || ''}" 
+                        placeholder="Teacher feedback / remarks..." 
+                        class="w-full text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs"
+                      />
+                    </div>
+
+                    <!-- Save & Publish Button -->
+                    <button 
+                      onclick="saveMarksForSubmission('${s.id}', '${s.assignmentId}', '${s.studentName}', ${s.maxMarks || 100})" 
+                      type="button" 
+                      class="btn-view bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 py-2 px-3.5 shadow-xs transition active:scale-95 whitespace-nowrap"
+                    >
+                      <i data-lucide="award" class="w-3.5 h-3.5"></i>
+                      <span>Save & Publish Marks</span>
+                    </button>
+
+                  </div>
+
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+  if (window.lucide) window.lucide.createIcons();
+}
+
+async function saveMarksForSubmission(subId, asgnId, studentName, maxMarks = 100) {
+  const marksInput = document.getElementById(`grade-marks-${subId}`);
+  const feedbackInput = document.getElementById(`grade-feedback-${subId}`);
+
+  const marksVal = marksInput ? marksInput.value.trim() : "";
+  const feedbackVal = feedbackInput ? feedbackInput.value.trim() : "";
+
+  if (!marksVal) {
+    alert("Please enter marks before publishing.");
+    if (marksInput) marksInput.focus();
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/teacher/grade-submission", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        submission_id: subId,
+        assignment_id: asgnId,
+        student_name: studentName,
+        marks: marksVal,
+        feedback: feedbackVal,
+        max_marks: maxMarks
+      })
+    });
+
+    const resJson = await res.json();
+    if (res.ok && resJson.success) {
+      showToast(`✓ Published Marks (${resJson.submission.marks}) for ${studentName}! Synced to Student Dashboard in real-time.`);
+      
+      // Update in memory if student object exists in dashboardData
+      const st = dashboardData.students.find(s => s.name === studentName || (studentName.includes("Pranjal") && s.id === "std-00"));
+      if (st) {
+        st.score = parseInt(marksVal) || st.score;
+        renderStudentsDirectory();
+      }
+
+      // Re-render submissions view
+      renderSubmissionsGradingView(currentSubmissionsFilterClass);
+
+      // Also refresh student detail view if evaluating this student
+      if (currentActiveStudentId) {
+        renderStudentSubmissionsInDetail(currentActiveStudentId, studentName);
+      }
+    } else {
+      alert("Could not save marks: " + (resJson.error || "Server error"));
+    }
+  } catch (err) {
+    console.warn("Error grading submission:", err);
+    alert("Network error while publishing marks.");
+  }
+}
+
+// Render Submissions & Awarded Marks inside view-student-detail
+async function renderStudentSubmissionsInDetail(studentId, studentName) {
+  const container = document.getElementById("sdStudentSubmissionsList");
+  const countBadge = document.getElementById("sdStudentSubmissionsCountBadge");
+  if (!container) return;
+
+  const targetName = studentName || (dashboardData.students.find(s => s.id === studentId)?.name) || "Pranjal Singh";
+
+  try {
+    const res = await fetch(`/api/teacher/submissions?student_name=${encodeURIComponent(targetName)}`);
+    if (res.ok) {
+      const data = await res.json();
+      const subs = (data && data.success && Array.isArray(data.submissions)) ? data.submissions : [];
+
+      if (countBadge) {
+        const gradedCount = subs.filter(s => s.status === "Graded").length;
+        countBadge.textContent = `${subs.length} Total Submissions (${gradedCount} Graded)`;
+      }
+
+      if (subs.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center text-slate-400 bg-slate-50/60 rounded-xl border border-slate-100">
+            <i data-lucide="file-question" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+            <div class="text-xs font-bold text-slate-600">No submissions uploaded by ${targetName} yet</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">When the student uploads an assignment solution, it will display here with evaluation controls.</p>
+          </div>
+        `;
+        if (window.lucide) window.lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = subs.map(s => {
+        const isGraded = s.status === "Graded" && s.marks && s.marks !== "Pending Review";
+        return `
+          <div class="p-4 rounded-2xl border ${isGraded ? 'border-emerald-200 bg-emerald-50/25' : 'border-slate-200 bg-white'} shadow-2xs space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span class="text-[10.5px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                  ${s.class || 'CSE 1st Year'}
+                </span>
+                <h4 class="text-sm font-bold text-slate-900 mt-1">${s.assignmentTitle || 'Assignment Submission'}</h4>
+              </div>
+
+              <!-- Marks Awarded Badge -->
+              <div class="flex items-center gap-2">
+                ${isGraded ? `
+                  <div class="px-3 py-1 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold text-xs flex items-center gap-1.5 shadow-2xs">
+                    <i data-lucide="award" class="w-3.5 h-3.5 text-emerald-600"></i>
+                    <span>Awarded Marks: <strong>${s.marks}</strong></span>
+                  </div>
+                ` : `
+                  <span class="status-pill needs-attention text-xs">
+                    Pending Evaluation
+                  </span>
+                `}
+              </div>
+            </div>
+
+            <!-- Solution file & meta -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-1 text-xs">
+              <div class="flex items-center gap-2">
+                <a 
+                  href="${s.downloadUrl || ('/api/student/download-submission/' + encodeURIComponent(s.fileName))}" 
+                  download="${s.fileName}"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-blue-500 text-xs font-bold text-blue-700 shadow-2xs hover:bg-blue-50 transition"
+                  title="Download and inspect student solution"
+                >
+                  <i data-lucide="file-check" class="w-4 h-4 text-emerald-600"></i>
+                  <span>${s.fileName}</span>
+                  <span class="text-[10px] text-slate-400 font-mono">(${s.fileSize || '1.4 MB'})</span>
+                  <i data-lucide="download" class="w-3 h-3 text-slate-400"></i>
+                </a>
+                <span class="text-slate-400 text-[11.5px]">Submitted on <strong>${s.submittedAt}</strong></span>
+              </div>
+
+              ${s.feedback ? `
+                <div class="w-full text-xs text-slate-700 bg-white p-2.5 rounded-xl border border-slate-200/90 flex items-start gap-2">
+                  <i data-lucide="message-square" class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5"></i>
+                  <div><strong class="text-emerald-800">Teacher Evaluation Remarks:</strong> ${s.feedback}</div>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Quick Inline Marks Updater -->
+            <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-end gap-2.5">
+              <span class="text-[11px] font-semibold text-slate-500">Edit / Update Marks:</span>
+              <div class="flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                <input 
+                  type="number" 
+                  id="sd-marks-${s.id}" 
+                  value="${s.scoreNum !== null && s.scoreNum !== undefined ? s.scoreNum : (s.marks ? parseInt(s.marks) || '' : '')}" 
+                  placeholder="95"
+                  class="w-12 text-center font-bold text-xs border-0 focus:outline-none"
+                />
+                <span class="text-xs text-slate-400">/ ${s.maxMarks || 100}</span>
+              </div>
+              <input 
+                type="text" 
+                id="sd-feedback-${s.id}" 
+                value="${s.feedback || ''}" 
+                placeholder="Updated teacher feedback..." 
+                class="text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1 w-52 focus:outline-none"
+              />
+              <button 
+                onclick="saveMarksFromDetailView('${s.id}', '${s.assignmentId}', '${s.studentName}', ${s.maxMarks || 100})" 
+                type="button" 
+                class="btn-view bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-1 px-3 shadow-2xs"
+              >
+                Update Marks
+              </button>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+  } catch (err) {
+    console.warn("Could not load student detail submissions:", err);
+  }
+}
+
+async function saveMarksFromDetailView(subId, asgnId, studentName, maxMarks) {
+  const marksInput = document.getElementById(`sd-marks-${subId}`);
+  const feedbackInput = document.getElementById(`sd-feedback-${subId}`);
+
+  const marksVal = marksInput ? marksInput.value.trim() : "";
+  const feedbackVal = feedbackInput ? feedbackInput.value.trim() : "";
+
+  if (!marksVal) {
+    alert("Please enter marks.");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/teacher/grade-submission", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        submission_id: subId,
+        assignment_id: asgnId,
+        student_name: studentName,
+        marks: marksVal,
+        feedback: feedbackVal,
+        max_marks: maxMarks
+      })
+    });
+
+    const resJson = await res.json();
+    if (res.ok && resJson.success) {
+      showToast(`✓ Marks (${resJson.submission.marks}) saved for ${studentName}! Synced in real-time.`);
+      renderStudentSubmissionsInDetail(currentActiveStudentId, studentName);
+      
+      const st = dashboardData.students.find(s => s.name === studentName || (studentName.includes("Pranjal") && s.id === "std-00"));
+      if (st) {
+        st.score = parseInt(marksVal) || st.score;
+        const scoreEl = document.getElementById("sdOverallScore");
+        if (scoreEl) scoreEl.textContent = `${st.score}%`;
+        renderStudentsDirectory();
+      }
+    }
+  } catch (err) {
+    console.warn("Error updating marks from detail view:", err);
+  }
+}
+
 async function submitCreateAndFloatAssignment(e) {
   e.preventDefault();
 
@@ -3107,6 +3651,7 @@ async function submitCreateAndFloatAssignment(e) {
   let savedFileSize = initialFileSize;
   let storagePath = `raw data/assignment/${initialFileName}`;
   let downloadUrl = `/api/teacher/download-assignment/${encodeURIComponent(initialFileName)}`;
+  let createdAssignmentId = null;
 
   try {
     const formData = new FormData();
@@ -3115,6 +3660,8 @@ async function submitCreateAndFloatAssignment(e) {
     formData.append("subject", subject);
     formData.append("instructions", instructions);
     formData.append("due_date", formattedDueDate);
+    formData.append("faculty", (dashboardData.teacher && dashboardData.teacher.name) || "Dr. Ananya Sharma");
+    formData.append("max_points", maxMarks);
 
     if (currentSelectedAssignmentFile) {
       formData.append("file", currentSelectedAssignmentFile);
@@ -3132,7 +3679,10 @@ async function submitCreateAndFloatAssignment(e) {
         savedFileSize = saveJson.fileSize || initialFileSize;
         storagePath = saveJson.storagePath || storagePath;
         downloadUrl = saveJson.downloadUrl || downloadUrl;
-        console.log("? Stored in raw data/assignment:", saveJson);
+        if (saveJson.assignment && saveJson.assignment.id) {
+          createdAssignmentId = saveJson.assignment.id;
+        }
+        console.log("✓ Stored in raw data/assignment:", saveJson);
       }
     }
   } catch (backendErr) {
@@ -3141,7 +3691,7 @@ async function submitCreateAndFloatAssignment(e) {
 
   // Create Assignment Object
   const newAssignment = {
-    id: "asgn-" + Date.now(),
+    id: createdAssignmentId || ("asgn-" + Date.now()),
     title: title,
     class: targetClass,
     subject: subject,
@@ -4664,4 +5214,291 @@ function previewCustomQuiz(quizId) {
   modal.classList.remove("hidden");
   modal.classList.add("flex");
   if (window.lucide) window.lucide.createIcons();
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PENDING ASSIGNMENTS CHECK: REVIEW ATTACHED SOLUTIONS & LIVE GRADING
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function renderPendingAssignmentsCheckView() {
+  const container = document.getElementById("pacSubmissionsListContainer");
+  const badgeText = document.getElementById("pacBadgeText");
+  const badgeEl = document.getElementById("pacSubmissionsBadge");
+  const filterEl = document.getElementById("pacFilterClass");
+  const filterVal = filterEl ? filterEl.value : "CSE 1st Year";
+
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-100 shadow-sm">
+      <i data-lucide="loader" class="w-7 h-7 mx-auto mb-2 animate-spin text-blue-600"></i>
+      <div class="text-sm font-semibold text-slate-700">Loading student attached solutions...</div>
+    </div>
+  `;
+  if (window.lucide) window.lucide.createIcons();
+
+  let submissions = [];
+  try {
+    const res = await fetch("/api/teacher/submissions");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.submissions)) {
+        submissions = data.submissions;
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching submissions for pending check:", err);
+  }
+
+  // Fallback to local storage if needed
+  if (submissions.length === 0) {
+    try {
+      const savedSubs = localStorage.getItem("prashiksha_student_submissions");
+      if (savedSubs) {
+        const parsed = JSON.parse(savedSubs);
+        submissions = Object.values(parsed);
+      }
+    } catch (e) {}
+  }
+
+  // Filter by selected class
+  let filtered = submissions;
+  if (filterVal && filterVal !== "All") {
+    filtered = submissions.filter(s => {
+      const sCls = (s.class || "").toLowerCase();
+      const fCls = filterVal.toLowerCase();
+      if (fCls.includes("1") && (sCls.includes("1") || sCls.includes("cse 1"))) return true;
+      if (fCls.includes("2") && (sCls.includes("2") || sCls.includes("cse 2"))) return true;
+      if (fCls.includes("3") && (sCls.includes("3") || sCls.includes("cse 3"))) return true;
+      return sCls.includes(fCls);
+    });
+  }
+
+  const pendingCount = filtered.filter(s => s.status !== "Graded" || s.marks === "Pending Review").length;
+  if (badgeText) {
+    badgeText.textContent = `${filtered.length} Submissions (${pendingCount} Pending Review)`;
+  }
+  if (badgeEl) {
+    if (pendingCount > 0) {
+      badgeEl.className = "px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1.5";
+    } else {
+      badgeEl.className = "px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1.5";
+    }
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-100 shadow-sm">
+        <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-3 opacity-40 text-slate-500"></i>
+        <div class="text-base font-bold text-slate-700">No Submissions Found for ${filterVal}</div>
+        <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+          When students in ${filterVal} (such as Pranjal Singh) attach and submit assignments, their solution files and grading cards will appear here.
+        </p>
+      </div>
+    `;
+    if (window.lucide) window.lucide.createIcons();
+    return;
+  }
+
+  container.innerHTML = filtered.map(sub => {
+    const isGraded = sub.status === "Graded" && sub.marks && sub.marks !== "Pending Review";
+    const studentName = sub.studentName || "Pranjal Singh";
+    const rollNo = sub.rollNumber || "CSE-2026-084";
+    const stdClass = sub.class || "CSE 1st Year";
+    const initial = studentName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "PS";
+    const downloadHref = sub.downloadUrl || `/api/student/download-submission/${encodeURIComponent(sub.fileName)}`;
+
+    return `
+      <div class="p-5 rounded-2xl border ${isGraded ? 'border-emerald-200 bg-emerald-50/20' : 'border-slate-200 bg-white'} shadow-sm space-y-4 transition-all">
+        <!-- Top Row: Student Identity & Status -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-slate-900 text-white font-extrabold flex items-center justify-center text-sm shadow-sm">
+              ${initial}
+            </span>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-bold text-slate-900">${studentName}</h3>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                  ${stdClass}
+                </span>
+              </div>
+              <div class="text-[11.5px] text-slate-500 mt-0.5 flex items-center gap-2">
+                <span>Roll: <strong class="text-slate-700">${rollNo}</strong></span>
+                <span>•</span>
+                <span>Email: <strong class="text-slate-700">${sub.studentEmail || 'singh.pranjalabc2020@gmail.com'}</strong></span>
+              </div>
+            </div>
+          </div>
+          <div>
+            ${isGraded ? `
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Graded: ${sub.marks}
+              </span>
+            ` : `
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i> Pending Review
+              </span>
+            `}
+          </div>
+        </div>
+
+        <!-- Middle Row: Assignment Information & Student Attached File -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div class="text-[11px] uppercase tracking-wider font-bold text-slate-400">Assignment Title</div>
+            <div class="text-sm font-bold text-slate-900 mt-0.5">${sub.assignmentTitle || 'Assignment Problem Set'}</div>
+            <div class="text-xs text-slate-500 mt-1 flex items-center gap-2">
+              <span>Submitted: <strong>${sub.submittedAt || 'Today'}</strong></span>
+              ${sub.comments ? `<span>• Note: "${sub.comments}"</span>` : ''}
+            </div>
+          </div>
+
+          <!-- Attached File Download Card -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5 overflow-hidden">
+              <div class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+              </div>
+              <div class="overflow-hidden">
+                <div class="text-xs font-bold text-slate-800 truncate" title="${sub.originalName || sub.fileName}">
+                  ${sub.originalName || sub.fileName}
+                </div>
+                <div class="text-[10.5px] text-slate-400">Attached Solution (${sub.fileSize || 'PDF Document'})</div>
+              </div>
+            </div>
+            <a href="${downloadHref}" download="${sub.fileName}" class="shrink-0 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Download File
+            </a>
+          </div>
+        </div>
+
+        <!-- Bottom Row: Grading Marks Input, Feedback, and Action Button -->
+        <div class="pt-3 border-t border-slate-100 bg-slate-50/50 -mx-5 -mb-5 p-4 rounded-b-2xl">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+            <div class="sm:col-span-3">
+              <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                Marks Awarded (e.g. 98 / 100)
+              </label>
+              <input 
+                type="text" 
+                id="pac-marks-${sub.id}" 
+                value="${isGraded ? sub.marks : '98 / 100'}" 
+                class="w-full text-xs font-bold p-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="98 / 100"
+              />
+            </div>
+            <div class="sm:col-span-6">
+              <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                Teacher Feedback for Student
+              </label>
+              <input 
+                type="text" 
+                id="pac-feedback-${sub.id}" 
+                value="${sub.feedback || 'Excellent logical structure and clean implementation.'}" 
+                class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="Add constructive notes or feedback..."
+              />
+            </div>
+            <div class="sm:col-span-3">
+              <button 
+                onclick="giveMarksFromPendingAssignmentsCheck('${sub.id}')" 
+                id="pac-btn-${sub.id}"
+                class="w-full p-2.5 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition active:scale-[0.98]">
+                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+                <span>Give Marks & Sync</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+async function giveMarksFromPendingAssignmentsCheck(submissionId) {
+  const marksInput = document.getElementById(`pac-marks-${submissionId}`);
+  const feedbackInput = document.getElementById(`pac-feedback-${submissionId}`);
+  const btn = document.getElementById(`pac-btn-${submissionId}`);
+
+  const marks = marksInput ? marksInput.value.trim() : "98 / 100";
+  const feedback = feedbackInput ? feedbackInput.value.trim() : "Excellent assignment solution!";
+
+  if (!marks) {
+    showToast("Please enter marks before publishing.");
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> Publishing...`;
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  try {
+    const payload = {
+      submission_id: submissionId,
+      marks: marks,
+      feedback: feedback
+    };
+
+    const res = await fetch("/api/teacher/grade-submission", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(`Marks (${marks}) awarded to Pranjal Singh! Synchronized to Student Evaluate menu.`);
+
+      // Update in-memory student score for Pranjal Singh (std-00)
+      const pStudent = dashboardData.students.find(s => s.id === "std-00" || s.name.toLowerCase().includes("pranjal"));
+      if (pStudent) {
+        const scoreNum = parseFloat(marks) || 98;
+        pStudent.score = Math.round(scoreNum);
+        pStudent.status = pStudent.score >= 90 ? "Excellent" : "Average";
+
+        try {
+          const bridgeData = PrashikshaDataBridge.getStudentData(pStudent.id);
+          if (bridgeData) {
+            bridgeData.score = pStudent.score;
+            bridgeData.status = pStudent.status;
+            localStorage.setItem(`prashiksha_student_${pStudent.id}`, JSON.stringify(bridgeData));
+          }
+        } catch (e) {}
+      }
+
+      // Re-render Students directory so the updated score is immediately visible in Students tab
+      renderStudentsDirectory();
+
+      // If student detail view is currently opened for Pranjal Singh, update live
+      if (typeof currentActiveStudentId !== "undefined" && (currentActiveStudentId === "std-00" || currentActiveStudentId === "std-01")) {
+        const scoreHeader = document.getElementById("sdOverallScore");
+        if (scoreHeader && pStudent) scoreHeader.textContent = `${pStudent.score}%`;
+        renderStudentSubmissionsInDetail(pStudent.id, pStudent.name);
+      }
+
+      // Re-render the pending assignments list
+      await renderPendingAssignmentsCheckView();
+    } else {
+      showToast((data && data.error) || "Failed to publish marks.");
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Give Marks & Sync`;
+        if (window.lucide) window.lucide.createIcons();
+      }
+    }
+  } catch (err) {
+    console.error("Grading error:", err);
+    showToast("Network error publishing marks.");
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Give Marks & Sync`;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
 }

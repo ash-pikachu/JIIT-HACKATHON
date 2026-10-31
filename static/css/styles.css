@@ -5507,3 +5507,421 @@ textarea:focus {
     border-radius: 9999px;
     transition: width 0.4s ease;
 }
+
+/* ==========================================================================
+   STUDENT ASSIGNMENT UPLOAD & SUBMISSION STYLING
+   ========================================================================== */
+
+/* Overview Banner */
+.asgn-stats-banner {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 16px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.asgn-stat-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.asgn-stat-num {
+    font-size: 24px;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+.asgn-stat-num.text-emerald {
+    color: #059669;
+}
+
+.asgn-stat-num.text-amber {
+    color: #d97706;
+}
+
+.asgn-stat-lbl {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #64748b;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.asgn-stat-divider {
+    width: 1px;
+    height: 36px;
+    background: #e2e8f0;
+}
+
+/* Action Buttons */
+.asgn-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #000000;
+    color: #ffffff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.asgn-upload-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.asgn-reupload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #f8fafc;
+    color: #0f172a;
+    border: 1.5px solid #cbd5e1;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.asgn-reupload-btn:hover {
+    background: #ffffff;
+    border-color: #000000;
+    transform: translateY(-1px);
+}
+
+/* Status Badges */
+.asgn-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    white-space: nowrap;
+}
+
+.asgn-status-badge.submitted {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+.asgn-status-badge.pending {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.submission-meta-row {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Upload Modal */
+.hidden {
+    display: none !important;
+}
+
+.student-upload-modal-backdrop.hidden,
+.student-upload-modal-backdrop[style*="display: none"] {
+    display: none !important;
+}
+
+.student-upload-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.student-upload-modal-dialog {
+    background: #ffffff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 580px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+    border: 1.5px solid #e2e8f0;
+    overflow: hidden;
+    animation: modalSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.student-upload-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1.5px solid #f1f5f9;
+}
+
+.upload-icon-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.student-upload-title {
+    font-size: 18px;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    color: #0f172a;
+    margin: 0;
+}
+
+.student-upload-subtitle {
+    font-size: 12.5px;
+    color: #64748b;
+    margin: 2px 0 0;
+}
+
+.modal-x-close-btn {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.modal-x-close-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.student-upload-modal-body {
+    padding: 20px 24px;
+}
+
+.upload-target-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+}
+
+.upload-target-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.upload-target-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+}
+
+/* Dropzone */
+.student-dropzone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 16px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    background: #fafafa;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.student-dropzone:hover, .student-dropzone.dragover {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.dropzone-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #0f172a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    transition: transform 0.2s ease;
+}
+
+.student-dropzone:hover .dropzone-icon {
+    background: #2563eb;
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+.dropzone-text {
+    font-size: 14px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 4px;
+}
+
+.dropzone-sub {
+    font-size: 11.5px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* File Preview */
+.upload-file-preview {
+    margin-top: 14px;
+    background: #f0fdf4;
+    border: 1.5px solid #bbf7d0;
+    border-radius: 14px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.file-preview-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #dcfce7;
+    color: #15803d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-preview-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #0f172a;
+    word-break: break-all;
+}
+
+.file-preview-size {
+    font-size: 11px;
+    color: #15803d;
+    font-weight: 600;
+}
+
+.file-remove-btn {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+}
+
+.file-remove-btn:hover {
+    background: #fee2e2;
+}
+
+.upload-form-group {
+    margin-top: 14px;
+}
+
+.upload-form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.upload-form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.upload-form-group textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.upload-status-strip {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.upload-status-strip.success {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+.upload-status-strip.error {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.student-upload-modal-footer {
+    padding: 16px 24px;
+    background: #f8fafc;
+    border-top: 1.5px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}

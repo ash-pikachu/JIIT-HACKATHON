@@ -15,7 +15,7 @@
                     <strong>{{ state.user.name }}</strong>
                     <span class="classroom-portal-badge" style="font-size: 9px; font-weight: 800; background: #e0e7ff; color: #4338ca; padding: 1px 6px; border-radius: 9999px; text-transform: uppercase;">Classroom</span>
                 </div>
-                <small>{{ languages.get(state.language, "English") }} • CSE 2nd Year</small>
+                <small>{{ languages.get(state.language, "English") }} • {{ state.user.class or "CSE 1st Year (CSE 1)" }}</small>
             </div>
             <i data-lucide="external-link" style="width: 13px; height: 13px; opacity: 0.6;"></i>
         </div>
@@ -291,13 +291,13 @@
             <div>
                 <div class="classroom-title-row">
                     <h2 class="classroom-student-name">Pranjal Singh</h2>
-                    <span class="classroom-class-tag">CSE 2nd Year &bull; Section A</span>
+                    <span class="classroom-class-tag">CSE 1st Year (CSE 1) &bull; Section A</span>
                     <span class="classroom-status-live">
                         <span class="pulse-dot-green"></span>
                         <span>Synced with Teacher Portal (Dr. Ananya Sharma)</span>
                     </span>
                 </div>
-                <p class="classroom-subtitle">Computer Science & Engineering &bull; Roll No: CSE-2026-084 &bull; Faculty: Dr. Ananya Sharma</p>
+                <p class="classroom-subtitle">Computer Science & Engineering &bull; Roll No: CSE-2026-084 &bull; Email: singh.pranjalabc2020@gmail.com &bull; Faculty: Dr. Ananya Sharma</p>
             </div>
         </div>
 
@@ -460,6 +460,24 @@
                     </div>
                 </div>
 
+                <!-- Assignment Status Overview Banner -->
+                <div class="asgn-stats-banner">
+                    <div class="asgn-stat-item">
+                        <span class="asgn-stat-num" id="asgnTotalCount">3</span>
+                        <span class="asgn-stat-lbl">Active Assignments</span>
+                    </div>
+                    <div class="asgn-stat-divider"></div>
+                    <div class="asgn-stat-item">
+                        <span class="asgn-stat-num text-emerald" id="asgnSubmittedCount">1</span>
+                        <span class="asgn-stat-lbl">Submitted Solutions</span>
+                    </div>
+                    <div class="asgn-stat-divider"></div>
+                    <div class="asgn-stat-item">
+                        <span class="asgn-stat-num text-amber" id="asgnPendingCount">2</span>
+                        <span class="asgn-stat-lbl">Pending Submission</span>
+                    </div>
+                </div>
+
                 <div class="assignments-list-container" id="studentAssignmentsList">
                     <!-- Populated dynamically -->
                 </div>
@@ -593,6 +611,84 @@
             </div>
         </section>
 
+    </div>
+</div>
+
+<!-- ===============================================================
+     STUDENT ASSIGNMENT UPLOAD MODAL
+=============================================================== -->
+<div id="studentAssignmentUploadModal" class="student-upload-modal-backdrop hidden" style="display: none;">
+    <div class="student-upload-modal-dialog">
+        <div class="student-upload-modal-header">
+            <div class="flex-row-gap" style="align-items: center; gap: 12px;">
+                <div class="upload-icon-circle">
+                    <i data-lucide="upload-cloud"></i>
+                </div>
+                <div>
+                    <h3 class="student-upload-title">Submit Assignment Solution</h3>
+                    <p class="student-upload-subtitle">Upload your solved problem sheet, document, code, or ZIP archive.</p>
+                </div>
+            </div>
+            <button type="button" class="modal-x-close-btn" onclick="closeAssignmentUploadModal()" aria-label="Close modal">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+
+        <div class="student-upload-modal-body">
+            <!-- Assignment Target Summary Card -->
+            <div class="upload-target-card">
+                <div class="upload-target-meta">
+                    <span class="code-pill" id="uploadModalSubject">Computer Science</span>
+                    <span class="info-pill"><i data-lucide="user" style="width: 12px; height: 12px;"></i> Pranjal Singh &bull; CSE-2026-084 &bull; CSE 1</span>
+                </div>
+                <h4 class="upload-target-title" id="uploadModalAsgnTitle">Problem Set Title</h4>
+            </div>
+
+            <!-- Drag and Drop Dropzone -->
+            <div class="student-dropzone" id="studentAssignmentDropzone" onclick="document.getElementById('studentAssignmentFileInput').click()">
+                <input type="file" id="studentAssignmentFileInput" style="display: none;" accept=".pdf,.doc,.docx,.zip,.txt,.py,.cpp,.java,.sql" onchange="handleAssignmentFileSelect(event)">
+                <div class="dropzone-inner">
+                    <div class="dropzone-icon">
+                        <i data-lucide="file-up"></i>
+                    </div>
+                    <h5 class="dropzone-text">Click to choose a file or drag & drop here</h5>
+                    <p class="dropzone-sub">Supported formats: PDF, DOCX, ZIP, Python, C++, Java, TXT (Max 25 MB)</p>
+                </div>
+            </div>
+
+            <!-- Selected File Preview -->
+            <div class="upload-file-preview hidden" id="uploadFilePreviewCard" style="display: none;">
+                <div class="flex-row-gap" style="align-items: center; gap: 12px;">
+                    <div class="file-preview-icon">
+                        <i data-lucide="file-text"></i>
+                    </div>
+                    <div>
+                        <div class="file-preview-name" id="previewFileName">solution.pdf</div>
+                        <div class="file-preview-size" id="previewFileSize">1.2 MB</div>
+                    </div>
+                </div>
+                <button type="button" class="file-remove-btn" onclick="clearSelectedAssignmentFile(event)" title="Remove file">
+                    <i data-lucide="trash-2"></i>
+                </button>
+            </div>
+
+            <!-- Optional Comments Input -->
+            <div class="upload-form-group">
+                <label for="studentSubmissionComments">Notes / Remarks for Faculty (Optional)</label>
+                <textarea id="studentSubmissionComments" class="modal-textarea" rows="2" placeholder="e.g. Solved all 5 problems with time complexity analysis and edge cases."></textarea>
+            </div>
+
+            <!-- Status notification banner -->
+            <div id="studentUploadStatusBanner" class="hidden upload-status-strip" style="display: none;"></div>
+        </div>
+
+        <div class="student-upload-modal-footer">
+            <button type="button" class="secondary-btn" onclick="closeAssignmentUploadModal()">Cancel</button>
+            <button type="button" class="primary-btn" id="btnSubmitStudentAssignment" onclick="submitStudentAssignment()">
+                <i data-lucide="send"></i>
+                <span>Submit Assignment</span>
+            </button>
+        </div>
     </div>
 </div>
 
