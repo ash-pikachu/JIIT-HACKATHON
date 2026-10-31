@@ -1741,3 +1741,369 @@ setupTopDockAndPanels();
 setupFullNotesPage();
 lucide.createIcons();
 
+
+
+// ====================================================================
+// CLASSROOM DASHBOARD LOGIC FOR PRANJAL SINGH
+// ====================================================================
+
+const studentClassroomData = {
+    student: {
+        name: "Pranjal Singh",
+        rollNumber: "CSE-2026-084",
+        class: "CSE 2nd Year",
+        section: "Section A",
+        faculty: "Dr. Ananya Sharma",
+        overallMastery: "84.5%",
+        topicsStudied: 42,
+        studyHours: "38.4 Hours"
+    },
+    syllabus: {
+        course: "Data Structures & Algorithms",
+        code: "CS-201",
+        credits: "4.0 Credits",
+        term: "Semester III • Academic Year 2026-27",
+        units: [
+            {
+                unitNumber: 1,
+                title: "Linear Data Structures & Algorithmic Complexity",
+                hours: "8 Hours",
+                topics: [
+                    { name: "Asymptotic Analysis (Big-O, Omega, Theta) & Master Theorem", status: "Covered", date: "Sep 04, 2026", mastery: 91 },
+                    { name: "Dynamic Arrays, Vectors & Amortized Complexity Analysis", status: "Covered", date: "Sep 11, 2026", mastery: 88 },
+                    { name: "Singly, Doubly and Circular Linked Lists Implementation", status: "Covered", date: "Sep 18, 2026", mastery: 94 }
+                ]
+            },
+            {
+                unitNumber: 2,
+                title: "Stacks, Queues & Hash Table Collisions",
+                hours: "9 Hours",
+                topics: [
+                    { name: "Stack Applications: Infix to Postfix & Monotonic Stacks", status: "Covered", date: "Sep 25, 2026", mastery: 82 },
+                    { name: "Circular Queues, Deques & Priority Queue Heaps", status: "Covered", date: "Oct 02, 2026", mastery: 86 },
+                    { name: "Hash Functions, Separate Chaining & Open Addressing Probing", status: "Covered", date: "Oct 09, 2026", mastery: 80 }
+                ]
+            },
+            {
+                unitNumber: 3,
+                title: "Tree Structures, Binary Search Trees & AVL Balancing",
+                hours: "11 Hours",
+                topics: [
+                    { name: "Binary Tree Traversals (Inorder, Preorder, Postorder, Level-Order)", status: "Covered", date: "Oct 16, 2026", mastery: 89 },
+                    { name: "Binary Search Trees Operations (Search, Insert, Delete)", status: "Covered", date: "Oct 23, 2026", mastery: 85 },
+                    { name: "Self-Balancing AVL Trees (Rotations: LL, RR, LR, RL)", status: "In-Progress", date: "Oct 30, 2026", mastery: 74 },
+                    { name: "B-Trees & B+ Trees for Database Indexing", status: "Upcoming", date: "Scheduled", mastery: 0 }
+                ]
+            },
+            {
+                unitNumber: 4,
+                title: "Graph Algorithms & Shortest Path Paradigms",
+                hours: "10 Hours",
+                topics: [
+                    { name: "Graph Representations (Adjacency Matrix, Adjacency List)", status: "Upcoming", date: "Scheduled", mastery: 0 },
+                    { name: "Breadth-First Search (BFS) & Depth-First Search (DFS)", status: "Upcoming", date: "Scheduled", mastery: 0 },
+                    { name: "Dijkstra and Bellman-Ford Shortest Path Algorithms", status: "Upcoming", date: "Scheduled", mastery: 0 },
+                    { name: "Minimum Spanning Trees: Kruskal and Prim Algorithms", status: "Upcoming", date: "Scheduled", mastery: 0 }
+                ]
+            }
+        ]
+    },
+    assignments: [
+        {
+            id: "asgn-1",
+            title: "Problem Set #01: Binary Search Trees & AVL Balancing",
+            subject: "Data Structures & Algorithms",
+            dueDate: "Nov 04, 2026",
+            fileName: "Binary_Search_Trees_Sheet.pdf",
+            fileSize: "1.4 MB",
+            status: "Submitted",
+            grade: "96 / 100",
+            downloadUrl: "/api/teacher/download-assignment/Binary_Search_Trees_Sheet.pdf"
+        },
+        {
+            id: "asgn-2",
+            title: "Problem Set #02: Virtual Memory & Page Replacement",
+            subject: "Operating Systems",
+            dueDate: "Nov 06, 2026",
+            fileName: "Virtual_Memory_Sheet.pdf",
+            fileSize: "1.4 MB",
+            status: "Active",
+            grade: "Pending Review",
+            downloadUrl: "/api/teacher/download-assignment/Virtual_Memory_Sheet.pdf"
+        },
+        {
+            id: "asgn-3",
+            title: "Problem Set #03: Pointers & Dynamic Memory in C++",
+            subject: "Fundamentals of Logic & C++",
+            dueDate: "Nov 02, 2026",
+            fileName: "Pointers_Dynamic_Memory_Sheet.pdf",
+            fileSize: "1.4 MB",
+            status: "Submitted",
+            grade: "92 / 100",
+            downloadUrl: "/api/teacher/download-assignment/Pointers_Dynamic_Memory_Sheet.pdf"
+        }
+    ],
+    quizzes: [
+        {
+            id: "qz-1",
+            title: "AVL Trees & BST Balance Factor Rapid Check",
+            category: "Data Structures & Algorithms",
+            questionsCount: 5,
+            duration: "10s Per Question",
+            scheduleDate: "Nov 02, 2026 • 10:00 AM",
+            status: "Upcoming",
+            badge: "Scheduled"
+        },
+        {
+            id: "qz-2",
+            title: "Operating Systems Concurrency & Locks",
+            category: "Operating Systems & Architecture",
+            questionsCount: 5,
+            duration: "10s Per Question",
+            scheduleDate: "Nov 05, 2026 • 11:30 AM",
+            status: "Upcoming",
+            badge: "Scheduled"
+        }
+    ],
+    subjects: [
+        { name: "Data Structures & Algorithms", code: "CS-201", mastery: 88, topics: 14, hours: "14.2 hrs" },
+        { name: "Operating Systems & Architecture", code: "CS-202", mastery: 82, topics: 11, hours: "10.8 hrs" },
+        { name: "Database Management Systems", code: "CS-203", mastery: 86, topics: 10, hours: "8.5 hrs" },
+        { name: "Natural Sciences & Computational AI", code: "CS-204", mastery: 92, topics: 7, hours: "4.9 hrs" }
+    ],
+    results: [
+        {
+            quizName: "Mid-Term AI Diagnostic Quiz",
+            category: "Natural Sciences & AI",
+            date: "Oct 28, 2026",
+            score: "5 / 5 (100%)",
+            accuracy: "100%",
+            timerAdherence: "7.2s Avg",
+            status: "Verified Exemplary"
+        },
+        {
+            quizName: "Stacks & Monotonic Queues Check",
+            category: "Data Structures",
+            date: "Oct 20, 2026",
+            score: "4 / 5 (80%)",
+            accuracy: "80%",
+            timerAdherence: "8.6s Avg",
+            status: "Mastered"
+        },
+        {
+            quizName: "Linear Complexity & Master Theorem",
+            category: "Algorithms",
+            date: "Oct 10, 2026",
+            score: "5 / 5 (100%)",
+            accuracy: "100%",
+            timerAdherence: "6.8s Avg",
+            status: "Verified Exemplary"
+        },
+        {
+            quizName: "Dynamic Memory Allocation in C++",
+            category: "Programming Logic",
+            date: "Sep 28, 2026",
+            score: "4 / 5 (80%)",
+            accuracy: "80%",
+            timerAdherence: "9.1s Avg",
+            status: "Mastered"
+        }
+    ]
+};
+
+function openClassroomDashboard() {
+    const modal = document.getElementById("classroomFullscreenDashboard");
+    if (!modal) return;
+
+    // Load from localStorage if teacher floated new assignments
+    try {
+        const savedQueue = localStorage.getItem('prashiksha_floating_queue');
+        if (savedQueue) {
+            const parsed = JSON.parse(savedQueue);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                parsed.forEach(item => {
+                    if (!studentClassroomData.assignments.some(a => a.id === item.id)) {
+                        studentClassroomData.assignments.unshift({
+                            id: item.id,
+                            title: item.title,
+                            subject: item.subject,
+                            dueDate: item.dueDate,
+                            fileName: item.fileName,
+                            fileSize: item.fileSize,
+                            status: "Active",
+                            grade: "Pending Review",
+                            downloadUrl: item.downloadUrl || `/api/teacher/download-assignment/${encodeURIComponent(item.fileName)}`
+                        });
+                    }
+                });
+            }
+        }
+    } catch (e) {
+        console.warn("Could not load floated assignments", e);
+    }
+
+    renderStudentSyllabus();
+    renderStudentAssignments();
+    renderStudentQuizzes();
+    renderStudentProgress();
+    renderStudentResults();
+
+    switchClassroomTab("hub");
+
+    modal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+    }
+}
+
+function closeClassroomDashboard() {
+    const modal = document.getElementById("classroomFullscreenDashboard");
+    if (!modal) return;
+    modal.classList.add("hidden");
+    document.body.style.overflow = "auto";
+}
+
+function switchClassroomTab(tabName) {
+    const tabBtns = document.querySelectorAll(".classroom-tab-btn");
+    tabBtns.forEach(btn => {
+        if (btn.getAttribute("data-class-tab") === tabName) {
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    });
+
+    const views = document.querySelectorAll(".classroom-tab-view");
+    views.forEach(view => {
+        if (view.id === `classTab-${tabName}`) {
+            view.classList.remove("hidden");
+            view.classList.add("active");
+        } else {
+            view.classList.add("hidden");
+            view.classList.remove("active");
+        }
+    });
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+    }
+}
+
+function renderStudentSyllabus() {
+    const container = document.getElementById("studentSyllabusContainer");
+    if (!container) return;
+
+    container.innerHTML = studentClassroomData.syllabus.units.map(unit => `
+        <div class="syllabus-unit-box">
+            <div class="syllabus-unit-title-bar">
+                <div class="flex-row-gap">
+                    <span class="unit-badge">Unit ${unit.unitNumber}</span>
+                    <span class="unit-title-text">${unit.title}</span>
+                </div>
+                <span class="credits-pill">${unit.hours}</span>
+            </div>
+            <div class="unit-topics-list">
+                ${unit.topics.map(topic => {
+                    let pillClass = "topic-status-pill upcoming";
+                    if (topic.status === "Covered") pillClass = "topic-status-pill covered";
+                    else if (topic.status === "In-Progress") pillClass = "topic-status-pill in-progress";
+                    return `
+                        <div class="student-topic-row">
+                            <div>
+                                <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${topic.name}</div>
+                                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Date: ${topic.date} • Mastery Target: ${topic.mastery}%</div>
+                            </div>
+                            <span class="${pillClass}">${topic.status}</span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderStudentAssignments() {
+    const container = document.getElementById("studentAssignmentsList");
+    if (!container) return;
+
+    container.innerHTML = studentClassroomData.assignments.map(asgn => `
+        <div class="student-asgn-card">
+            <div style="flex: 1; min-width: 260px;">
+                <div class="flex-row-gap" style="margin-bottom: 4px;">
+                    <span class="code-pill">${asgn.subject}</span>
+                    <span style="font-size: 11px; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 9999px;">Floated by Dr. Ananya Sharma</span>
+                </div>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 4px 0;">${asgn.title}</h4>
+                <div style="font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 12px;">
+                    <span>Due: <strong>${asgn.dueDate}</strong></span>
+                    <span>File: <strong>${asgn.fileName}</strong> (${asgn.fileSize})</span>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="${asgn.downloadUrl}" download="${asgn.fileName}" class="asgn-dl-btn" title="Download from raw data/assignment/">
+                    <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+                    <span>Download Sheet</span>
+                </a>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderStudentQuizzes() {
+    const container = document.getElementById("studentQuizzesList");
+    if (!container) return;
+
+    container.innerHTML = studentClassroomData.quizzes.map(quiz => `
+        <div class="student-asgn-card">
+            <div>
+                <span class="code-pill">${quiz.category}</span>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 6px 0 2px;">${quiz.title}</h4>
+                <div style="font-size: 12px; color: #64748b;">Schedule: <strong>${quiz.scheduleDate}</strong> • ${quiz.duration}</div>
+            </div>
+            <span class="score-badge" style="background: #eef2ff; color: #4338ca; border-color: #c7d2fe;">${quiz.badge}</span>
+        </div>
+    `).join('');
+}
+
+function renderStudentProgress() {
+    const container = document.getElementById("studentSubjectProgressGrid");
+    if (!container) return;
+
+    container.innerHTML = studentClassroomData.subjects.map(subj => `
+        <div class="subject-item-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 11px; font-weight: 800; color: #2563eb; font-family: monospace;">${subj.code}</span>
+                <span style="font-size: 15px; font-weight: 900; color: #059669;">${subj.mastery}%</span>
+            </div>
+            <h4 style="font-size: 14px; font-weight: 800; color: #0f172a; margin: 8px 0 2px;">${subj.name}</h4>
+            <div class="subj-track">
+                <div class="subj-fill" style="width: ${subj.mastery}%;"></div>
+            </div>
+            <div style="font-size: 11px; color: #64748b; display: flex; justify-content: space-between;">
+                <span>${subj.topics} Topics Covered</span>
+                <span>${subj.hours} Logged</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderStudentResults() {
+    const tbody = document.getElementById("studentQuizResultsTable");
+    if (!tbody) return;
+
+    tbody.innerHTML = studentClassroomData.results.map(res => `
+        <tr>
+            <td>
+                <div style="font-weight: 700; color: #0f172a;">${res.quizName}</div>
+                <small style="color: #64748b;">${res.category}</small>
+            </td>
+            <td>${res.date}</td>
+            <td><strong style="color: #059669;">${res.score}</strong></td>
+            <td>${res.accuracy}</td>
+            <td><span style="font-size: 11.5px; font-weight: 700; color: #4338ca; background: #e0e7ff; padding: 2px 8px; border-radius: 9999px;">${res.timerAdherence}</span></td>
+            <td><span class="score-badge">${res.status}</span></td>
+        </tr>
+    `).join('');
+}

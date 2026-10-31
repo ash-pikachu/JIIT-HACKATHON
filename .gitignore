@@ -2,6 +2,16 @@
 .env
 .env.*
 !.env.example
+Teacher dashboard/config.js
+!Teacher dashboard/config.example.js
+config.js
+!config.example.js
+
+# Temporary scratch and patch scripts
+scratch/
+patch_*.py
+update_*.py
+append_*.py
 
 # Python generated files
 __pycache__/

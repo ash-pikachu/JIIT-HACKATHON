@@ -1,0 +1,2457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Disha - Teacher Dashboard</title>
+  
+  <!-- Authentication Guard: Ensures user logs in first -->
+  <script>
+    if (sessionStorage.getItem('disha_logged_in') !== 'true') {
+      window.location.replace('index.html');
+    }
+  </script>
+  
+    <!-- Early Theme State Init (Prevents FOUC) -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('disha_theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    })();
+  </script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            brandDark: '#0c0d0f',
+            sidebarActive: '#1f2127',
+            canvas: '#f8f9fa',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Lucide Icons & Chart.js -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Styles with Web Guidelines & Motion Tuning -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-[#f8f9fa] text-[#0f172a] antialiased selection:bg-slate-900 selection:text-white">
+
+  <!-- Left Sidebar Navigation (Matching Image) -->
+  <aside class="sidebar">
+    <div>
+      <!-- Brand Logo & Name -->
+      <div class="px-2 pt-1 pb-7 flex items-start gap-3">
+        <!-- Minimal Leaf / Feather SVG Icon from Design -->
+        <div class="text-white pt-0.5">
+          <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21 3C21 3 17 4 12 9C7 14 6 18 6 18C6 18 10 17 15 12C20 7 21 3 21 3Z" />
+            <path d="M3 21C3 21 5 19 8 16C11 13 14 10 14 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 class="text-white text-[17px] font-bold tracking-tight">Disha</h1>
+          </div>
+          <p class="text-[11px] text-[#8b929e] font-normal tracking-wide mt-0.5">Learn · Grow · Succeed</p>
+          <div class="inline-block mt-1 px-1.5 py-0.5 rounded bg-white/10 text-[9.5px] font-semibold text-emerald-300 uppercase tracking-wider">
+            Teacher Portal
+          </div>
+        </div>
+      </div>
+
+      <!-- Nav Items -->
+      <nav class="space-y-0.5" id="sidebarNav">
+        <a href="#" class="nav-item active" data-tab="home">
+          <i data-lucide="home"></i>
+          <span>Home</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="students">
+          <i data-lucide="users"></i>
+          <span>Students</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="evaluation">
+          <i data-lucide="clipboard-check"></i>
+          <span>Evaluation</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="classes">
+          <i data-lucide="graduation-cap"></i>
+          <span>Classes</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="assignments">
+          <i data-lucide="file-text"></i>
+          <span>Assignments</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="quiz">
+          <i data-lucide="help-circle"></i>
+          <span>Quiz</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="ai-assistant">
+          <i data-lucide="sparkles"></i>
+          <span>AI Assistant</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="materials">
+          <i data-lucide="folder"></i>
+          <span>Learning Materials</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="announcements">
+          <i data-lucide="megaphone"></i>
+          <span>Announcements</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="settings">
+          <i data-lucide="settings"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="px-2 pt-4 border-t border-white/10 flex flex-col gap-3">
+      <button onclick="handleLogout()" type="button" class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-semibold text-xs tracking-wide text-white bg-[#FFA726] hover:bg-[#FB8C00] transition shadow-md shadow-amber-500/20 active:scale-[0.98]">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+        <span>Sign Out</span>
+      </button>
+
+      <div>
+        <div class="text-[13px] text-white font-medium">Better Learning</div>
+        <div class="text-[11px] text-white/70 mt-0.5">Builds a Brighter Future</div>
+        <div class="mt-2 text-white/40">
+          <!-- Subtle wavy line graphic from design -->
+          <svg width="46" height="12" viewBox="0 0 46 12" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M1 6C6 1 11 11 16 6C21 1 26 11 31 6C36 1 41 11 45 6" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="main-wrapper">
+
+    <!-- Top Bar with Search & Profile (Matching Image + Glass Highlight) -->
+    <header class="h-20 px-8 flex items-center justify-between sticky top-0 topbar-glass z-30">
+      <!-- Search Input -->
+      <div class="relative w-full max-w-lg">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+        <input 
+          id="globalSearchInput" 
+          type="text" 
+          placeholder="Search students, classes, or anything..." 
+          class="w-full bg-white border border-[#e5e7eb] rounded-xl pl-11 pr-4 py-2.5 text-[13.5px] text-slate-800 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 transition"
+        />
+        <!-- Live Search Dropdown Suggestions -->
+        <div id="searchDropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden max-h-72 overflow-y-auto"></div>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-4">
+        <!-- Day / Night Mode Toggle Switch -->
+        <button id="themeToggleBtn" onclick="toggleTheme()" type="button" aria-label="Toggle Night Mode" class="theme-toggle-btn" title="Toggle Light / Night mode">
+          <i data-lucide="sun" class="w-4 h-4 text-amber-500 theme-sun-icon"></i>
+          <i data-lucide="moon" class="w-4 h-4 text-sky-400 theme-moon-icon hidden"></i>
+          <div class="theme-toggle-pill"><span class="theme-toggle-dot"></span></div>
+          <span id="themeToggleText">Day</span>
+        </button>
+
+        <!-- Notification Bell -->
+        <div class="relative">
+          <button id="notificationBtn" aria-label="Notifications" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-white transition relative border border-transparent hover:border-slate-200">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 absolute top-2.5 right-2.5 pulse-dot"></span>
+          </button>
+          <!-- Notification Dropdown -->
+          <div id="notificationsDropdown" class="hidden absolute right-0 top-12 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl p-3 z-50 text-xs">
+            <div class="font-bold text-slate-900 px-2 py-1 text-sm border-b border-slate-100 flex items-center justify-between">
+              <span>Notifications</span>
+              <span class="text-[11px] font-normal text-slate-400">Prashiksha Sync</span>
+            </div>
+            <div class="divide-y divide-slate-100 mt-1 max-h-60 overflow-y-auto">
+              <div class="p-2 hover:bg-slate-50 cursor-pointer rounded-lg transition">
+                <div class="font-semibold text-slate-900">12 Pending Evaluations</div>
+                <div class="text-slate-500 text-[11px] mt-0.5">CSE 2nd Year submitted assignment #03</div>
+              </div>
+              <div class="p-2 hover:bg-slate-50 cursor-pointer rounded-lg transition">
+                <div class="font-semibold text-slate-900">Attendance Flag</div>
+                <div class="text-slate-500 text-[11px] mt-0.5">Rohan Mehta fell below 70% threshold</div>
+              </div>
+              <div class="p-2 hover:bg-slate-50 cursor-pointer rounded-lg transition">
+                <div class="font-semibold text-slate-900">Disha AI Ready</div>
+                <div class="text-slate-500 text-[11px] mt-0.5">Automated quiz recommendations generated</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teacher Profile Pill with Hover Dropdown & Click to Open Full Details -->
+        <div class="relative group" id="profileDropdownGroup">
+          <!-- Profile Pill -->
+          <div onclick="openTeacherProfileModal()" class="flex items-center gap-3 pl-3 border-l border-slate-200 cursor-pointer hover:opacity-90 transition py-1">
+            <div class="relative">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-200 to-slate-100 overflow-hidden flex items-center justify-center text-slate-800 font-bold border border-slate-300 shadow-sm">
+                <i data-lucide="user" class="w-5 h-5"></i>
+              </div>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 absolute -bottom-0.5 -right-0.5 ring-2 ring-white"></span>
+            </div>
+            <div>
+              <div class="text-[13.5px] font-bold text-slate-900 leading-tight">Dr. Ananya Sharma</div>
+              <div class="text-[11px] text-slate-500 font-normal">Instructor · CSE</div>
+            </div>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-900 transition-transform"></i>
+          </div>
+
+          <!-- Hover Dropdown Wrapper with Invisible Bridge & Zero Gap -->
+          <div class="hidden group-hover:block absolute right-0 top-full pt-1 z-50">
+            <div class="dropdown-bridge w-64 bg-white border border-slate-200 rounded-2xl shadow-2xl py-2 text-xs fade-in">
+              <!-- Header mini card -->
+              <div onclick="openTeacherProfileModal()" class="px-4 py-3 border-b border-slate-100 bg-slate-50/70 -mt-2 rounded-t-2xl cursor-pointer hover:bg-slate-100/70 transition">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
+                    AS
+                  </div>
+                  <div>
+                    <div class="font-bold text-slate-900 text-sm leading-tight">Dr. Ananya Sharma</div>
+                    <div class="text-[11px] text-slate-500">Instructor · CSE Dept</div>
+                  </div>
+                </div>
+                <div class="mt-2 text-[10.5px] text-slate-400 truncate">ananya.sharma@prashiksha.edu</div>
+              </div>
+
+              <!-- Action options -->
+              <div class="py-1">
+                <button onclick="openTeacherProfileModal()" class="w-full text-left px-4 py-2.5 text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition font-medium">
+                  <i data-lucide="id-card" class="w-4 h-4 text-slate-500"></i>
+                  <span>View Full Faculty Details</span>
+                </button>
+                <button onclick="switchTab('settings')" class="w-full text-left px-4 py-2.5 text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition font-medium">
+                  <i data-lucide="settings" class="w-4 h-4 text-slate-500"></i>
+                  <span>Portal Settings</span>
+                </button>
+              </div>
+
+              <!-- Logout option on hover -->
+              <div class="pt-1 border-t border-slate-100">
+                <button onclick="handleLogout()" class="w-full text-left px-4 py-2.5 text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition font-semibold">
+                  <i data-lucide="log-out" class="w-4 h-4 text-rose-500"></i>
+                  <span>Log Out of Session</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Views Container -->
+    <main class="px-8 pb-12 flex-1">
+
+      <!-- ================= TAB 1: HOME (EXACT 1:1 REPLICA OF THE IMAGE) ================= -->
+      <section id="view-home" class="tab-view space-y-6">
+
+        <!-- Welcome Banner Row -->
+        <div class="flex items-center justify-between pt-2 pb-1">
+          <div>
+            <h1 class="text-[26px] font-bold tracking-tight text-slate-900">Good morning, Teacher</h1>
+            <p class="text-[13.5px] text-slate-500 mt-0.5">Here's a quick overview of your classes and students.</p>
+          </div>
+          <!-- Date Pill Selector -->
+          <div class="flex items-center gap-2 bg-white border border-[#e5e7eb] px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 shadow-sm cursor-pointer hover:border-slate-300 hover:shadow transition">
+            <i data-lucide="calendar" class="w-4 h-4 text-slate-500"></i>
+            <span>Thu, 30 Oct 2026</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+          </div>
+        </div>
+
+        <!-- 4 Summary Stat Cards (Row 1) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Card 1: Total Students -->
+          <div class="dashboard-card stat-card p-5" onclick="switchTab('students')">
+            <div class="flex items-center justify-between">
+              <div class="stat-icon-wrapper w-10 h-10 rounded-full bg-[#f3f4f6] flex items-center justify-center text-slate-900">
+                <i data-lucide="users" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-3.5">
+              <div class="text-xs text-slate-500 font-medium">Total Students</div>
+              <div class="text-[28px] font-bold text-slate-900 mt-1 tabular-nums">48</div>
+            </div>
+            <div class="mt-3 pt-2 flex items-center justify-between text-xs text-slate-500 font-normal border-t border-slate-50">
+              <span>Across 3 classes</span>
+              <i data-lucide="arrow-right" class="arrow-icon w-3.5 h-3.5 text-slate-400"></i>
+            </div>
+          </div>
+
+          <!-- Card 2: Average Performance -->
+          <div class="dashboard-card stat-card p-5" onclick="switchTab('evaluation')">
+            <div class="flex items-center justify-between">
+              <div class="stat-icon-wrapper w-10 h-10 rounded-full bg-[#f3f4f6] flex items-center justify-center text-slate-900">
+                <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-3.5">
+              <div class="text-xs text-slate-500 font-medium">Average Performance</div>
+              <div class="text-[28px] font-bold text-slate-900 mt-1 tabular-nums">78%</div>
+            </div>
+            <div class="mt-3 pt-2 flex items-center justify-between text-xs text-slate-500 font-normal border-t border-slate-50">
+              <span class="flex items-center gap-1 font-semibold text-slate-700">
+                <span>↑ 6%</span>
+                <span class="text-slate-400 font-normal">from last month</span>
+              </span>
+              <i data-lucide="arrow-right" class="arrow-icon w-3.5 h-3.5 text-slate-400"></i>
+            </div>
+          </div>
+
+          <!-- Card 3: Active Classes -->
+          <div class="dashboard-card stat-card p-5" onclick="switchTab('classes')">
+            <div class="flex items-center justify-between">
+              <div class="stat-icon-wrapper w-10 h-10 rounded-full bg-[#f3f4f6] flex items-center justify-center text-slate-900">
+                <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-3.5">
+              <div class="text-xs text-slate-500 font-medium">Active Classes</div>
+              <div class="text-[28px] font-bold text-slate-900 mt-1 tabular-nums">3</div>
+            </div>
+            <div class="mt-3 pt-2 flex items-center justify-between text-xs text-slate-500 font-normal border-t border-slate-50">
+              <span>Batches running</span>
+              <i data-lucide="arrow-right" class="arrow-icon w-3.5 h-3.5 text-slate-400"></i>
+            </div>
+          </div>
+
+          <!-- Card 4: Pending Evaluations -->
+          <div class="dashboard-card stat-card p-5" onclick="switchTab('evaluation')">
+            <div class="flex items-center justify-between">
+              <div class="stat-icon-wrapper w-10 h-10 rounded-full bg-[#f3f4f6] flex items-center justify-center text-slate-900">
+                <i data-lucide="file-check" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-3.5">
+              <div class="text-xs text-slate-500 font-medium">Pending Evaluations</div>
+              <div class="text-[28px] font-bold text-slate-900 mt-1 tabular-nums">12</div>
+            </div>
+            <div class="mt-3 pt-2 flex items-center justify-between text-xs text-slate-500 font-normal border-t border-slate-50">
+              <span>Needs review</span>
+              <i data-lucide="arrow-right" class="arrow-icon w-3.5 h-3.5 text-slate-400"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle Section: Performance Trends & Class Performance & Student Evaluation -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          
+          <!-- Column 1: Student Performance Overview Line Chart (lg:col-span-5) -->
+          <div class="dashboard-card p-5 lg:col-span-5 flex flex-col justify-between relative">
+            <div>
+              <div class="flex items-start justify-between">
+                <div>
+                  <h3 class="text-[15px] font-bold text-slate-900">Student Performance Overview</h3>
+                  <p class="text-[11.5px] text-slate-500 mt-0.5">Average marks trend of all students in your classes</p>
+                </div>
+                <!-- Dropdown selector: Last 6 Months -->
+                <div class="relative">
+                  <select id="timeframeSelect" class="bg-white border border-slate-200 text-slate-700 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-slate-800 cursor-pointer font-semibold shadow-sm transition">
+                    <option value="6m">Last 6 Months</option>
+                    <option value="3m">Last 3 Months</option>
+                    <option value="1y">Academic Year</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chart Canvas Container -->
+            <div class="relative mt-4 h-52 w-full">
+              <!-- Floating Oct Badge from image with gentle animated pulse -->
+              <div class="chart-tooltip-badge" id="chartTooltipBadge">
+                <span id="chartTooltipMonth">Oct</span>
+                <span id="chartTooltipValue" class="tabular-nums">↑ 78%</span>
+              </div>
+              <canvas id="performanceChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Column 2: Class-wise Performance Bar Chart (lg:col-span-4) -->
+          <div class="dashboard-card p-5 lg:col-span-4 flex flex-col justify-between">
+            <div>
+              <h3 class="text-[15px] font-bold text-slate-900">Class-wise Performance</h3>
+              <p class="text-[11.5px] text-slate-500 mt-0.5">Average score per enrolled batch</p>
+            </div>
+
+            <!-- Bar Chart Canvas Container -->
+            <div class="relative mt-4 h-52 w-full">
+              <canvas id="classPerformanceChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Column 3: Student Evaluation (lg:col-span-3) -->
+          <div class="dashboard-card p-5 lg:col-span-3 flex flex-col justify-between">
+            <div>
+              <h3 class="text-[15px] font-bold text-slate-900">Student Evaluation</h3>
+              <p class="text-[11.5px] text-slate-500 mt-0.5">AI-powered insights for better teaching</p>
+
+              <!-- Student list with badges & arrows (matching mockup 1:1) -->
+              <div class="mt-3.5 space-y-1" id="studentEvaluationList">
+                <div onclick="openStudentModal('std-01')" class="flex items-center justify-between py-2 px-2 -mx-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group">
+                  <div class="flex items-center gap-3">
+                    <span class="avatar-initial">A</span>
+                    <div>
+                      <div class="text-[13.5px] font-semibold text-slate-900 group-hover:text-black">Aarav Sharma</div>
+                      <div class="text-[11.5px] text-slate-500 tabular-nums">89% · CSE 1st Year</div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <span class="status-pill">Excellent</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all"></i>
+                  </div>
+                </div>
+
+                <div onclick="openStudentModal('std-02')" class="flex items-center justify-between py-2 px-2 -mx-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group">
+                  <div class="flex items-center gap-3">
+                    <span class="avatar-initial">P</span>
+                    <div>
+                      <div class="text-[13.5px] font-semibold text-slate-900 group-hover:text-black">Priya Singh</div>
+                      <div class="text-[11.5px] text-slate-500 tabular-nums">76% · CSE 1st Year</div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <span class="status-pill">Good</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all"></i>
+                  </div>
+                </div>
+
+                <div onclick="openStudentModal('std-03')" class="flex items-center justify-between py-2 px-2 -mx-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group">
+                  <div class="flex items-center gap-3">
+                    <span class="avatar-initial">R</span>
+                    <div>
+                      <div class="text-[13.5px] font-semibold text-slate-900 group-hover:text-black">Rohan Mehta</div>
+                      <div class="text-[11.5px] text-slate-500 tabular-nums">58% · CSE 2nd Year</div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <span class="status-pill needs-attention">Needs Attention</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all"></i>
+                  </div>
+                </div>
+
+                <div onclick="openStudentModal('std-04')" class="flex items-center justify-between py-2 px-2 -mx-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group">
+                  <div class="flex items-center gap-3">
+                    <span class="avatar-initial">S</span>
+                    <div>
+                      <div class="text-[13.5px] font-semibold text-slate-900 group-hover:text-black">Sneha Verma</div>
+                      <div class="text-[11.5px] text-slate-500 tabular-nums">93% · CSE 2nd Year</div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <span class="status-pill">Excellent</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all"></i>
+                  </div>
+                </div>
+
+                <div onclick="openStudentModal('std-05')" class="flex items-center justify-between py-2 px-2 -mx-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group">
+                  <div class="flex items-center gap-3">
+                    <span class="avatar-initial">K</span>
+                    <div>
+                      <div class="text-[13.5px] font-semibold text-slate-900 group-hover:text-black">Kartik Yadav</div>
+                      <div class="text-[11.5px] text-slate-500 tabular-nums">62% · CSE 3rd Year</div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <span class="status-pill needs-attention">Needs Attention</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Footer Link -->
+            <div class="mt-3 pt-3 border-t border-slate-100">
+              <a href="#" onclick="switchTab('students'); return false;" class="text-xs font-semibold text-slate-800 hover:text-black flex items-center justify-between group">
+                <span>View All Students</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom Section: Recent Student Evaluations | Students Needing Extra Attention | Quick Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+
+          <!-- Left Card: Recent Student Evaluations Table (lg:col-span-5) -->
+          <div class="dashboard-card p-5 lg:col-span-5 flex flex-col justify-between">
+            <div>
+              <h3 class="text-[15px] font-bold text-slate-900">Recent Student Evaluations</h3>
+              <p class="text-[11.5px] text-slate-500 mt-0.5">Latest AI-generated evaluations and performance insights</p>
+
+              <!-- Table -->
+              <div class="mt-3 overflow-x-auto">
+                <table class="w-full text-left custom-table">
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Class</th>
+                      <th>Performance</th>
+                      <th>Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recentEvaluationsTableBody">
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                      <td class="font-medium text-slate-900 flex items-center gap-3">
+                        <span class="avatar-initial">A</span>
+                        <span class="font-semibold text-[13.5px]">Aarav Sharma</span>
+                      </td>
+                      <td class="text-slate-600 text-[13px]">CSE 1st Year</td>
+                      <td class="font-semibold text-slate-900 text-[13px] tabular-nums">89%</td>
+                      <td><span class="status-pill">Excellent</span></td>
+                      <td><button onclick="openStudentModal('std-01')" class="btn-view">View</button></td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                      <td class="font-medium text-slate-900 flex items-center gap-3">
+                        <span class="avatar-initial">P</span>
+                        <span class="font-semibold text-[13.5px]">Priya Singh</span>
+                      </td>
+                      <td class="text-slate-600 text-[13px]">CSE 1st Year</td>
+                      <td class="font-semibold text-slate-900 text-[13px] tabular-nums">76%</td>
+                      <td><span class="status-pill">Good</span></td>
+                      <td><button onclick="openStudentModal('std-02')" class="btn-view">View</button></td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                      <td class="font-medium text-slate-900 flex items-center gap-3">
+                        <span class="avatar-initial">R</span>
+                        <span class="font-semibold text-[13.5px]">Rohan Mehta</span>
+                      </td>
+                      <td class="text-slate-600 text-[13px]">CSE 2nd Year</td>
+                      <td class="font-semibold text-slate-900 text-[13px] tabular-nums">58%</td>
+                      <td><span class="status-pill needs-attention">Needs Attention</span></td>
+                      <td><button onclick="openStudentModal('std-03')" class="btn-view">View</button></td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                      <td class="font-medium text-slate-900 flex items-center gap-3">
+                        <span class="avatar-initial">S</span>
+                        <span class="font-semibold text-[13.5px]">Sneha Verma</span>
+                      </td>
+                      <td class="text-slate-600 text-[13px]">CSE 2nd Year</td>
+                      <td class="font-semibold text-slate-900 text-[13px] tabular-nums">93%</td>
+                      <td><span class="status-pill">Excellent</span></td>
+                      <td><button onclick="openStudentModal('std-04')" class="btn-view">View</button></td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                      <td class="font-medium text-slate-900 flex items-center gap-3">
+                        <span class="avatar-initial">K</span>
+                        <span class="font-semibold text-[13.5px]">Kartik Yadav</span>
+                      </td>
+                      <td class="text-slate-600 text-[13px]">CSE 3rd Year</td>
+                      <td class="font-semibold text-slate-900 text-[13px] tabular-nums">62%</td>
+                      <td><span class="status-pill needs-attention">Needs Attention</span></td>
+                      <td><button onclick="openStudentModal('std-05')" class="btn-view">View</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Footer Link -->
+            <div class="mt-3 pt-3 border-t border-slate-100">
+              <a href="#" onclick="switchTab('evaluation'); return false;" class="text-xs font-semibold text-slate-800 hover:text-black flex items-center justify-between group">
+                <span>View All Evaluations</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Middle Card: Students Needing Extra Attention (lg:col-span-4) -->
+          <div class="dashboard-card p-5 lg:col-span-4 flex flex-col justify-between">
+            <div>
+              <h3 class="text-[15px] font-bold text-slate-900">Students Needing Extra Attention</h3>
+              <p class="text-[11.5px] text-slate-500 mt-0.5">Based on performance, attendance and activity</p>
+
+              <div class="mt-3.5 space-y-1" id="attentionStudentsList">
+                <div onclick="openStudentModal('std-03')" class="flex items-center justify-between py-2 px-2 -mx-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
+                  <div class="flex items-center gap-3">
+                    <span class="avatar-initial">R</span>
+                    <div>
+                      <div class="text-[13.5px] font-semibold text-slate-900 group-hover:text-black">Rohan Mehta</div>
+                      <div class="text-[11.5px] text-slate-500">CSE 2nd Year</div>
+                    </div>
+                  </div>
+                  <span class="percent-pill-dark tabular-nums">58%</span>
+                </div>
+
+                <div onclick="openStudentModal('std-05')" class="flex items-center justify-between py-2 px-2 -mx-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
+                  <div class="flex items-center gap-3">
+                    <span class="avatar-initial">K</span>
+                    <div>
+                      <div class="text-[13.5px] font-semibold text-slate-900 group-hover:text-black">Kartik Yadav</div>
+                      <div class="text-[11.5px] text-slate-500">CSE 3rd Year</div>
+                    </div>
+                  </div>
+                  <span class="percent-pill-dark tabular-nums">62%</span>
+                </div>
+
+                <div onclick="openStudentModal('std-06')" class="flex items-center justify-between py-2 px-2 -mx-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
+                  <div class="flex items-center gap-3">
+                    <span class="avatar-initial">A</span>
+                    <div>
+                      <div class="text-[13.5px] font-semibold text-slate-900 group-hover:text-black">Aditya Rao</div>
+                      <div class="text-[11.5px] text-slate-500">CSE 1st Year</div>
+                    </div>
+                  </div>
+                  <span class="percent-pill-dark tabular-nums">64%</span>
+                </div>
+
+                <div onclick="openStudentModal('std-07')" class="flex items-center justify-between py-2 px-2 -mx-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
+                  <div class="flex items-center gap-3">
+                    <span class="avatar-initial">N</span>
+                    <div>
+                      <div class="text-[13.5px] font-semibold text-slate-900 group-hover:text-black">Neha Gupta</div>
+                      <div class="text-[11.5px] text-slate-500">CSE 2nd Year</div>
+                    </div>
+                  </div>
+                  <span class="percent-pill-dark tabular-nums">67%</span>
+                </div>
+
+                <div onclick="openStudentModal('std-08')" class="flex items-center justify-between py-2 px-2 -mx-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
+                  <div class="flex items-center gap-3">
+                    <span class="avatar-initial">S</span>
+                    <div>
+                      <div class="text-[13.5px] font-semibold text-slate-900 group-hover:text-black">Siddharth Jain</div>
+                      <div class="text-[11.5px] text-slate-500">CSE 3rd Year</div>
+                    </div>
+                  </div>
+                  <span class="percent-pill-dark tabular-nums">69%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Link -->
+            <div class="mt-3 pt-3 border-t border-slate-100">
+              <a href="#" onclick="switchTab('students'); return false;" class="text-xs font-semibold text-slate-800 hover:text-black flex items-center justify-between group">
+                <span>View All Students</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Card: Quick Actions (lg:col-span-3) -->
+          <div class="dashboard-card p-5 lg:col-span-3 flex flex-col justify-between">
+            <div>
+              <h3 class="text-[15px] font-bold text-slate-900 mb-3">Quick Actions</h3>
+
+              <div class="space-y-2">
+                <!-- Action 1: Create Assignment -->
+                <div onclick="openActionModal('assignment')" class="action-item-row p-2.5 rounded-xl border border-slate-100 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="action-icon-circle w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
+                      <i data-lucide="file-plus" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <div class="text-[13px] font-semibold text-slate-900 leading-tight">Create Assignment</div>
+                      <div class="text-[11px] text-slate-500">Add new assignment for your class</div>
+                    </div>
+                  </div>
+                  <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                </div>
+
+                <!-- Action 2: Generate Quiz (AI) -->
+                <div onclick="openActionModal('quiz')" class="action-item-row p-2.5 rounded-xl border border-slate-100 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="action-icon-circle w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
+                      <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <div class="text-[13px] font-semibold text-slate-900 leading-tight">Generate Quiz (AI)</div>
+                      <div class="text-[11px] text-slate-500">Get AI-powered questions</div>
+                    </div>
+                  </div>
+                  <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                </div>
+
+                <!-- Action 3: Upload Study Material -->
+                <div onclick="openActionModal('material')" class="action-item-row p-2.5 rounded-xl border border-slate-100 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="action-icon-circle w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
+                      <i data-lucide="folder-up" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <div class="text-[13px] font-semibold text-slate-900 leading-tight">Upload Study Material</div>
+                      <div class="text-[11px] text-slate-500">Share notes, PDFs, and resources</div>
+                    </div>
+                  </div>
+                  <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                </div>
+
+                <!-- Action 4: Send Announcement -->
+                <div onclick="openActionModal('announcement')" class="action-item-row p-2.5 rounded-xl border border-slate-100 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="action-icon-circle w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
+                      <i data-lucide="megaphone" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <div class="text-[13px] font-semibold text-slate-900 leading-tight">Send Announcement</div>
+                      <div class="text-[11px] text-slate-500">Notify your students</div>
+                    </div>
+                  </div>
+                  <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ================= TAB 2: STUDENTS DIRECTORY & ANIMATED PIE / DONUT GRAPH ================= -->
+      <section id="view-students" class="tab-view hidden space-y-6">
+        <div class="flex items-center justify-between pt-2">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900">Students Directory & Demographics</h2>
+            <p class="text-sm text-slate-500">All 48 students currently being taught across your 3 batches</p>
+          </div>
+          <!-- Filter Buttons -->
+          <div class="flex items-center gap-2">
+            <button onclick="renderStudentsDirectory('All')" class="btn-view bg-slate-900 text-white">All (48)</button>
+            <button onclick="renderStudentsDirectory('CSE 1st Year')" class="btn-view">CSE 1st Year (16)</button>
+            <button onclick="renderStudentsDirectory('CSE 2nd Year')" class="btn-view">CSE 2nd Year (18)</button>
+            <button onclick="renderStudentsDirectory('CSE 3rd Year')" class="btn-view">CSE 3rd Year (14)</button>
+          </div>
+        </div>
+
+        <!-- Total Students Teaching Graph Section (Donut / Pie Chart with Sweep Animation) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div class="dashboard-card p-5 lg:col-span-1 relative flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <h3 class="text-sm font-bold text-slate-900">Teaching Distribution (Pie Chart)</h3>
+                <span class="text-[10px] uppercase tracking-wider font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Live</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-3">Radial breakdown of students by batch</p>
+            </div>
+            
+            <div class="h-48 relative my-2">
+              <canvas id="totalStudentsChart"></canvas>
+              <!-- Center Callout inside Donut -->
+              <div class="donut-center-label">
+                <div class="text-xl font-extrabold text-slate-900 tabular-nums">48</div>
+                <div class="text-[10.5px] font-semibold text-slate-400 uppercase tracking-wider">Students</div>
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <span>3 Active Batches</span>
+              <span class="font-medium text-slate-600">Updated Today</span>
+            </div>
+          </div>
+
+          <div class="dashboard-card p-5 lg:col-span-2 flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900 mb-1">Class Health Summary</h3>
+              <p class="text-xs text-slate-500 mb-4">Real-time attendance and academic health flags</p>
+              <div class="grid grid-cols-3 gap-4">
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <span class="text-xs font-semibold text-slate-500">Above 85% Score</span>
+                  <div class="text-2xl font-bold text-slate-900 mt-1 tabular-nums">21 Students</div>
+                  <span class="text-[11px] text-emerald-600 font-medium">On track for honors</span>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <span class="text-xs font-semibold text-slate-500">Average 70-84%</span>
+                  <div class="text-2xl font-bold text-slate-900 mt-1 tabular-nums">19 Students</div>
+                  <span class="text-[11px] text-slate-500 font-medium">Steady progress</span>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <span class="text-xs font-semibold text-slate-500">Below 70%</span>
+                  <div class="text-2xl font-bold text-slate-900 mt-1 tabular-nums">8 Students</div>
+                  <span class="text-[11px] text-rose-600 font-medium">Intervention flagged</span>
+                </div>
+              </div>
+            </div>
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+              <span>Synced directly with Prashiksha Student App</span>
+              <button onclick="showToast('Exported complete student roster as CSV!')" class="btn-view text-xs">
+                Export Roster
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Full Students Table -->
+        <div class="dashboard-card p-5">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left custom-table">
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Class & Batch</th>
+                  <th>Attendance</th>
+                  <th>Assignments</th>
+                  <th>Avg Score</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="studentsDirectoryTable">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           FULL STUDENT EVALUATION DASHBOARD (Categorized by Subject + Prashiksha Data)
+      ==================================================================== -->
+      <section id="view-student-detail" class="tab-view hidden space-y-6">
+        
+        <!-- Navigation & Breadcrumb Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
+          <div class="flex items-center gap-3">
+            <button onclick="switchTab('students')" class="flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300 px-3.5 py-2 rounded-xl transition shadow-sm active:scale-95">
+              <i data-lucide="arrow-left" class="w-4 h-4 text-slate-500"></i>
+              <span>Back to Students</span>
+            </button>
+            <div class="h-4 w-[1px] bg-slate-300 hidden md:block"></div>
+            <div>
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Student Analytics</div>
+              <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <span id="sdStudentNameHeader">Aarav Sharma</span>
+                <span id="sdStudentStatusPill" class="status-pill text-xs">Excellent</span>
+              </h2>
+            </div>
+          </div>
+
+          <!-- Controls: Switcher & Prashiksha Live Badge -->
+          <div class="flex items-center gap-3">
+            <div class="prashiksha-sync-pill">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span>
+              <span>Prashiksha Telemetry Synced</span>
+            </div>
+            <!-- Quick Student Switcher -->
+            <select id="studentDashboardSelect" onchange="openStudentFullDashboard(this.value)" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Student Hero Banner Card -->
+        <div class="dashboard-card student-hero-banner p-6">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            
+            <!-- Left: Avatar & Identity -->
+            <div class="lg:col-span-5 flex items-start gap-4">
+              <div id="sdAvatarInitial" class="avatar-initial w-16 h-16 text-2xl font-bold shrink-0 shadow-md">
+                A
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <h3 id="sdStudentName" class="text-2xl font-extrabold text-slate-900 tracking-tight">Aarav Sharma</h3>
+                  <span id="sdStudentIdBadge" class="text-[10.5px] px-2 py-0.5 rounded-md font-semibold bg-blue-100 text-blue-700">std-01</span>
+                </div>
+                <p id="sdStudentClass" class="text-xs font-medium text-slate-500">CSE 1st Year · Batch A</p>
+                <div class="flex items-center gap-2 text-xs text-slate-500 pt-1">
+                  <span class="flex items-center gap-1"><i data-lucide="mail" class="w-3.5 h-3.5 text-slate-400"></i> <span id="sdStudentEmail">aarav.sharma@prashiksha.edu</span></span>
+                </div>
+                <div class="pt-2 text-xs text-slate-600 flex items-center gap-1.5">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-amber-500 shrink-0"></i>
+                  <span id="sdAiOverview" class="line-clamp-2">Consistent problem-solver, high flashcard accuracy in Prashiksha modules.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: 4 Quick Telemetry Stats -->
+            <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div class="p-3.5 bg-white/80 rounded-xl border border-slate-200/80 shadow-sm text-center">
+                <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Overall Score</div>
+                <div id="sdOverallScore" class="text-2xl font-black text-slate-900 mt-1 tabular-nums">89%</div>
+                <div class="text-[10px] text-emerald-600 font-semibold mt-0.5">Top 5% of Batch</div>
+              </div>
+              <div class="p-3.5 bg-white/80 rounded-xl border border-slate-200/80 shadow-sm text-center">
+                <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Topics Studied</div>
+                <div id="sdTopicsCount" class="text-2xl font-black text-slate-900 mt-1 tabular-nums">24</div>
+                <div class="text-[10px] text-blue-600 font-semibold mt-0.5">Across 4 Subjects</div>
+              </div>
+              <div class="p-3.5 bg-white/80 rounded-xl border border-slate-200/80 shadow-sm text-center">
+                <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Flashcard Quiz</div>
+                <div id="sdFlashcardAccuracy" class="text-2xl font-black text-slate-900 mt-1 tabular-nums">94%</div>
+                <div class="text-[10px] text-emerald-600 font-semibold mt-0.5">98 Total Answers</div>
+              </div>
+              <div class="p-3.5 bg-white/80 rounded-xl border border-slate-200/80 shadow-sm text-center">
+                <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Study Hours</div>
+                <div id="sdTotalHours" class="text-2xl font-black text-slate-900 mt-1 tabular-nums">39.5h</div>
+                <div class="text-[10px] text-slate-500 font-semibold mt-0.5">Prashiksha Time</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Subject Performance Graphs Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          
+          <!-- Graph 1: Subject Mastery Comparison (Bar / Categorized Graph) -->
+          <div class="dashboard-card p-5 lg:col-span-7 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Subject Mastery & Understanding Graph</h3>
+                <p class="text-xs text-slate-500">Live evaluation score % categorized across academic subjects</p>
+              </div>
+              <span class="text-[10.5px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                Prashiksha Telemetry
+              </span>
+            </div>
+            
+            <div class="h-64 relative my-2">
+              <canvas id="studentSubjectChart"></canvas>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <span class="flex items-center gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5 text-blue-500"></i> Higher understanding triggers automated advanced roadmap steps in Prashiksha.</span>
+            </div>
+          </div>
+
+          <!-- Graph 2: Study Hours & Quiz Accuracy (Radar / Area Graph) -->
+          <div class="dashboard-card p-5 lg:col-span-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Study Velocity & Flashcards</h3>
+                <p class="text-xs text-slate-500">Weekly Prashiksha sessions vs. quiz retention</p>
+              </div>
+              <span class="text-[10.5px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                Active
+              </span>
+            </div>
+
+            <div class="h-64 relative my-2">
+              <canvas id="studentActivityTrendChart"></canvas>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <span>Updated Real-Time via Student Portal</span>
+              <span class="font-semibold text-slate-700">94% Retention</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Subject Categories & Studied Items Header -->
+        <div class="flex items-center justify-between pt-2">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Subject Categories & Study Modules</h3>
+            <p class="text-xs text-slate-500">Click on any subject to inspect the complete list of topics and flashcards studied by this student</p>
+          </div>
+          <button onclick="showSendAssignmentModal()" class="btn-view flex items-center gap-1.5 text-xs bg-slate-900 text-white hover:bg-slate-800">
+            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+            <span>Assign New Subject Topic</span>
+          </button>
+        </div>
+
+        <!-- 4 Subject Cards Grid (With Action Button to see list of things studied!) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="sdSubjectCardsGrid">
+          <!-- Dynamically populated via renderStudentSubjectCards() -->
+        </div>
+
+      </section>
+
+
+      <!-- ================= TAB 3: STUDENT EVALUATION HUB ================= -->
+      <section id="view-evaluation" class="tab-view hidden space-y-6">
+        <div class="flex items-center justify-between pt-2">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900">AI Student Evaluation Center</h2>
+            <p class="text-sm text-slate-500">Comprehensive AI-powered scoring, diagnostics, and rubric insights for Prashiksha</p>
+          </div>
+          <button onclick="openActionModal('quiz')" class="btn-view bg-black text-white flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Run Class-wide AI Evaluation</span>
+          </button>
+        </div>
+
+        <!-- Evaluation Highlights -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="dashboard-card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <i data-lucide="check-circle" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <div class="text-xs text-slate-500 font-medium">Evaluations Completed</div>
+                <div class="text-2xl font-bold text-slate-900 tabular-nums">36 / 48</div>
+              </div>
+            </div>
+            <p class="text-xs text-slate-500 mt-3">75% of active students evaluated this month with detailed rubric.</p>
+          </div>
+          <div class="dashboard-card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                <i data-lucide="clock" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <div class="text-xs text-slate-500 font-medium">Pending Review</div>
+                <div class="text-2xl font-bold text-slate-900 tabular-nums">12 Students</div>
+              </div>
+            </div>
+            <p class="text-xs text-slate-500 mt-3">Submissions from CSE 2nd Year waiting for final teacher sign-off.</p>
+          </div>
+          <div class="dashboard-card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                <i data-lucide="zap" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <div class="text-xs text-slate-500 font-medium">Disha AI Insights</div>
+                <div class="text-2xl font-bold text-slate-900 tabular-nums">94.8%</div>
+              </div>
+            </div>
+            <p class="text-xs text-slate-500 mt-3">Alignment score between AI recommendations and teacher feedback.</p>
+          </div>
+        </div>
+
+        <!-- Diagnostic List -->
+        <div class="dashboard-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-slate-900">Detailed Student Diagnostics</h3>
+            <span class="text-xs text-slate-400">Click any student to view full AI breakdown & recommendation</span>
+          </div>
+          <div class="divide-y divide-slate-100">
+            <div class="py-3 flex items-center justify-between hover:bg-slate-50/70 p-2 rounded-lg cursor-pointer transition" onclick="openStudentModal('std-01')">
+              <div class="flex items-center gap-3">
+                <span class="avatar-initial">A</span>
+                <div>
+                  <div class="font-bold text-slate-900 text-sm">Aarav Sharma · <span class="text-slate-500 font-normal">CSE 1st Year</span></div>
+                  <div class="text-xs text-slate-500 mt-0.5">Strengths: Algorithmic thinking, discrete logic · Weakness: Theory proofs</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="status-pill excellent tabular-nums">Excellent · 89%</span>
+                <button class="btn-view">Inspect Evaluation</button>
+              </div>
+            </div>
+            <div class="py-3 flex items-center justify-between hover:bg-slate-50/70 p-2 rounded-lg cursor-pointer transition" onclick="openStudentModal('std-03')">
+              <div class="flex items-center gap-3">
+                <span class="avatar-initial">R</span>
+                <div>
+                  <div class="font-bold text-slate-900 text-sm">Rohan Mehta · <span class="text-slate-500 font-normal">CSE 2nd Year</span></div>
+                  <div class="text-xs text-slate-500 mt-0.5">Strengths: Basic data structures · Weakness: Graph algorithms, memory pointers</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="status-pill needs-attention tabular-nums">Needs Attention · 58%</span>
+                <button class="btn-view">Inspect Evaluation</button>
+              </div>
+            </div>
+            <div class="py-3 flex items-center justify-between hover:bg-slate-50/70 p-2 rounded-lg cursor-pointer transition" onclick="openStudentModal('std-04')">
+              <div class="flex items-center gap-3">
+                <span class="avatar-initial">S</span>
+                <div>
+                  <div class="font-bold text-slate-900 text-sm">Sneha Verma · <span class="text-slate-500 font-normal">CSE 2nd Year</span></div>
+                  <div class="text-xs text-slate-500 mt-0.5">Strengths: Outstanding problem-solving, clean code architecture</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="status-pill excellent tabular-nums">Excellent · 93%</span>
+                <button class="btn-view">Inspect Evaluation</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+            <!-- ====================================================================
+           CLASSES VIEW (Active Batches, Subject Syllabi & Topics Covered)
+      ==================================================================== -->
+      <section id="view-classes" class="tab-view hidden space-y-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-2xl font-bold text-slate-900">Your Active Classes & Subject Syllabi</h2>
+              <span class="prashiksha-sync-pill">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span>
+                <span>Curriculum Sync Active</span>
+              </span>
+            </div>
+            <p class="text-sm text-slate-500 mt-0.5">Select any class below to inspect the accredited syllabus and track topics covered in real time</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openCreateCustomQuizModal()" class="btn-view bg-[#0B63E5] hover:bg-[#094EC2] text-white flex items-center gap-2 font-bold shadow-md shadow-blue-500/20 active:scale-95 transition text-xs">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>Create Class Quiz</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Class Cards Grid (Clicking a card selects that class and loads its syllabus) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="classesCardsContainer">
+          <!-- Populated dynamically via renderClassesView() -->
+        </div>
+
+        <!-- Dedicated Class Syllabus & Covered Topics Explorer -->
+        <div id="classSyllabusViewerContainer" class="space-y-6 pt-2">
+          <!-- Populated dynamically via renderClassSyllabusView() -->
+        </div>
+
+      </section>
+
+      <!-- ====================================================================
+           ASSIGNMENTS VIEW (Dynamic List with File Upload & Prashiksha Floating)
+      ==================================================================== -->
+      <section id="view-assignments" class="tab-view hidden space-y-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-2xl font-bold text-slate-900">Assignments & Problem Sets</h2>
+              <span class="prashiksha-sync-pill">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span>
+                <span>Prashiksha Floating Active</span>
+              </span>
+            </div>
+            <p class="text-sm text-slate-500 mt-0.5">Publish problem sheets, set deadlines, and broadcast tasks to student workspaces</p>
+          </div>
+          
+          <button onclick="openCreateAssignmentModal()" class="btn-view bg-[#0B63E5] hover:bg-[#094EC2] text-white flex items-center gap-2 shadow-md shadow-blue-500/20 active:scale-95 transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Create & Float Assignment</span>
+          </button>
+        </div>
+
+        <!-- 4 Quick Assignment Telemetry Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="dashboard-card p-4">
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Active Floated</div>
+            <div id="statActiveAssignments" class="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">4 Tasks</div>
+            <div class="text-[11px] text-blue-600 font-medium mt-0.5">Live on Student Portals</div>
+          </div>
+          <div class="dashboard-card p-4">
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total Enrolled</div>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">48 Students</div>
+            <div class="text-[11px] text-emerald-600 font-medium mt-0.5">Across 3 Faculty Batches</div>
+          </div>
+          <div class="dashboard-card p-4">
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Submissions In</div>
+            <div id="statTotalSubmissions" class="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">43 / 48</div>
+            <div class="text-[11px] text-emerald-600 font-medium mt-0.5">89.5% Submission Rate</div>
+          </div>
+          <div class="dashboard-card p-4">
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Pending Review</div>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">12 Ungraded</div>
+            <div class="text-[11px] text-amber-600 font-medium mt-0.5">Prashiksha AI Pre-Checked</div>
+          </div>
+        </div>
+
+        <!-- Raw Data / Assignment Storage Status Pill -->
+        <div class="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shrink-0 shadow-xs">
+              <i data-lucide="hard-drive" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-900">Dedicated Assignment Repository</span>
+                <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10.5px] font-bold font-mono">raw data/assignment/</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">Every assignment created or floated to students is safely archived in the project root storage. Click download on any card to fetch the file directly.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+              <span>Auto-Synchronized</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Filter Pills Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <div class="flex flex-wrap items-center gap-2" id="assignmentFilterButtons">
+            <button onclick="filterAssignmentsList('All')" class="btn-view bg-slate-900 text-white assignment-filter-btn" data-filter="All">All (4)</button>
+            <button onclick="filterAssignmentsList('CSE 1st Year')" class="btn-view assignment-filter-btn" data-filter="CSE 1st Year">CSE 1st Year (16)</button>
+            <button onclick="filterAssignmentsList('CSE 2nd Year')" class="btn-view assignment-filter-btn" data-filter="CSE 2nd Year">CSE 2nd Year (18)</button>
+            <button onclick="filterAssignmentsList('CSE 3rd Year')" class="btn-view assignment-filter-btn" data-filter="CSE 3rd Year">CSE 3rd Year (14)</button>
+          </div>
+          <div class="text-xs text-slate-400">
+            <span>Teacher: <strong>Dr. Ananya Sharma</strong> · Instructor CSE</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Assignments List Container -->
+        <div class="space-y-3.5" id="assignmentsListContainer">
+          <!-- Rendered dynamically via renderAssignmentsList() -->
+        </div>
+
+      </section>
+
+      <!-- ====================================================================
+           QUIZ & LIVE ASSESSMENTS VIEW (Teacher Authored & Scheduled Quizzes)
+      ==================================================================== -->
+      <section id="view-quiz" class="tab-view hidden space-y-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-2xl font-bold text-slate-900">Quizzes & Live Assessments</h2>
+              <span class="prashiksha-sync-pill">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span>
+                <span>Prashiksha Quiz Dispatch Active</span>
+              </span>
+            </div>
+            <p class="text-sm text-slate-500 mt-0.5">Author your own questions and answers, schedule live tests, and set countdown durations for students</p>
+          </div>
+          
+          <button onclick="openCreateCustomQuizModal()" class="btn-view bg-[#0B63E5] hover:bg-[#094EC2] text-white flex items-center gap-2 shadow-md shadow-blue-500/20 active:scale-95 transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Create & Schedule Quiz</span>
+          </button>
+        </div>
+
+        <!-- 4 Quick Quiz Telemetry Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="dashboard-card p-4">
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Scheduled Quizzes</div>
+            <div id="statScheduledQuizzes" class="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">3 Scheduled</div>
+            <div class="text-[11px] text-blue-600 font-medium mt-0.5">Dispatched to Student Portals</div>
+          </div>
+          <div class="dashboard-card p-4">
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Questions Authored</div>
+            <div id="statTotalAuthoredQuestions" class="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">22 Questions</div>
+            <div class="text-[11px] text-emerald-600 font-medium mt-0.5">With Teacher Answers</div>
+          </div>
+          <div class="dashboard-card p-4">
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Target Students</div>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">48 Enrolled</div>
+            <div class="text-[11px] text-slate-500 font-medium mt-0.5">Across 3 Faculty Batches</div>
+          </div>
+          <div class="dashboard-card p-4">
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Avg Completion</div>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">84.2%</div>
+            <div class="text-[11px] text-emerald-600 font-medium mt-0.5">Real-Time Performance</div>
+          </div>
+        </div>
+
+        <!-- Filter Pills Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <div class="flex flex-wrap items-center gap-2" id="quizFilterButtons">
+            <button onclick="filterQuizzesList('All')" class="btn-view bg-slate-900 text-white quiz-filter-btn" data-filter="All">All Quizzes (3)</button>
+            <button onclick="filterQuizzesList('CSE 1st Year')" class="btn-view quiz-filter-btn" data-filter="CSE 1st Year">CSE 1st Year (16)</button>
+            <button onclick="filterQuizzesList('CSE 2nd Year')" class="btn-view quiz-filter-btn" data-filter="CSE 2nd Year">CSE 2nd Year (18)</button>
+            <button onclick="filterQuizzesList('CSE 3rd Year')" class="btn-view quiz-filter-btn" data-filter="CSE 3rd Year">CSE 3rd Year (14)</button>
+          </div>
+          <div class="text-xs text-slate-400">
+            <span>Synchronized with Prashiksha Student Class Roster</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Quizzes List Container -->
+        <div class="space-y-4" id="quizzesListContainer">
+          <!-- Populated dynamically via renderQuizzesList() -->
+        </div>
+
+      </section>
+
+
+      <!-- ================= TAB 6: AI ASSISTANT (DISHA COPILOT) ================= -->
+      <section id="view-ai-assistant" class="tab-view hidden space-y-6">
+        <div class="flex items-center justify-between pt-2">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900">Disha AI Teaching Copilot</h2>
+            <p class="text-sm text-slate-500">Autonomous insights, intelligent question drafting, and student intervention helper</p>
+          </div>
+          <span class="status-pill">Powered by Disha AI Engine</span>
+        </div>
+
+        <div class="dashboard-card p-6">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Ask Disha Copilot</label>
+          <div class="flex items-center gap-3">
+            <input 
+              id="aiPromptInput" 
+              type="text" 
+              class="flex-1 bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 transition"
+              placeholder="e.g. Generate 5 multiple-choice questions on Dijkstra's Algorithm for students needing extra attention"
+            />
+            <button onclick="generateAiTeachingInsight()" class="btn-view bg-black text-white hover:bg-slate-800 px-5 py-2.5 flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+              <span>Generate</span>
+            </button>
+          </div>
+
+          <div class="mt-4 flex items-center gap-2">
+            <span class="text-xs text-slate-400">Try prompts:</span>
+            <button onclick="document.getElementById('aiPromptInput').value = 'Diagnose CSE 2nd Year Graph theory gaps'; generateAiTeachingInsight();" class="text-xs bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-md text-slate-700 transition">Diagnose Graph theory gaps</button>
+            <button onclick="document.getElementById('aiPromptInput').value = 'Draft intervention plan for Rohan Mehta (58%)'; generateAiTeachingInsight();" class="text-xs bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-md text-slate-700 transition">Intervention for Rohan Mehta</button>
+            <button onclick="document.getElementById('aiPromptInput').value = 'Create honors project roadmap for Sneha Verma'; generateAiTeachingInsight();" class="text-xs bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-md text-slate-700 transition">Honors project for Sneha</button>
+          </div>
+
+          <!-- Dynamic Output Container -->
+          <div id="aiAssistantOutput" class="mt-6"></div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 7: LEARNING MATERIALS ================= -->
+      <section id="view-materials" class="tab-view hidden space-y-6">
+        <div class="flex items-center justify-between pt-2">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900">Learning Materials & Handouts</h2>
+            <p class="text-sm text-slate-500">Shared textbooks, lecture notes, and lab manuals distributed to students</p>
+          </div>
+          <button onclick="openActionModal('material')" class="btn-view bg-black text-white">Upload New Material</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="dashboard-card p-5">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-800 mb-3">
+              <i data-lucide="file-text" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-slate-900 text-sm">DSA Complete Course Slides (PDF)</h4>
+            <p class="text-xs text-slate-500 mt-1">Shared with CSE 2nd Year · 14.2 MB</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+              <span class="text-emerald-600 font-medium">Synced with Prashiksha</span>
+              <button onclick="showToast('Downloading file...')" class="btn-view text-xs">Download</button>
+            </div>
+          </div>
+          <div class="dashboard-card p-5">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-800 mb-3">
+              <i data-lucide="code" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-slate-900 text-sm">C++ Pointer & Memory Lab Repository</h4>
+            <p class="text-xs text-slate-500 mt-1">Shared with CSE 1st Year · GitHub Link</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+              <span class="text-emerald-600 font-medium">Synced with Prashiksha</span>
+              <button onclick="showToast('Opening GitHub...')" class="btn-view text-xs">View Code</button>
+            </div>
+          </div>
+          <div class="dashboard-card p-5">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-800 mb-3">
+              <i data-lucide="book-open" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-slate-900 text-sm">Operating Systems Deadlock Simulation Notes</h4>
+            <p class="text-xs text-slate-500 mt-1">Shared with CSE 3rd Year · 5.8 MB</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+              <span class="text-emerald-600 font-medium">Synced with Prashiksha</span>
+              <button onclick="showToast('Downloading file...')" class="btn-view text-xs">Download</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 8: ANNOUNCEMENTS ================= -->
+      <section id="view-announcements" class="tab-view hidden space-y-6">
+        <div class="flex items-center justify-between pt-2">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900">Broadcast Announcements</h2>
+            <p class="text-sm text-slate-500">Push instant updates to the Prashiksha student mobile and web apps</p>
+          </div>
+          <button onclick="openActionModal('announcement')" class="btn-view bg-black text-white">Post Announcement</button>
+        </div>
+
+        <div class="dashboard-card p-5 space-y-4">
+          <div class="p-4 border border-slate-200 rounded-xl">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">All Classes · Oct 30, 2026</span>
+              <span class="status-pill">Broadcasted</span>
+            </div>
+            <h4 class="text-base font-bold text-slate-900 mt-1">Lab Examination Schedule Announced</h4>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+              Practical examinations will commence from Nov 15. The detailed timetable and system allocations have been published on your Prashiksha student feed. Please ensure all assignment submissions are finalized beforehand.
+            </p>
+          </div>
+          <div class="p-4 border border-slate-200 rounded-xl">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">CSE 2nd Year · Oct 29, 2026</span>
+              <span class="status-pill">Broadcasted</span>
+            </div>
+            <h4 class="text-base font-bold text-slate-900 mt-1">Doubt Clearing Session: Graph Theory</h4>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+              Special evening virtual session scheduled at 5:00 PM on Friday to resolve BFS/DFS and recursion stack queries. Attendance is strongly encouraged for students working on the remedial sprint.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 9: SETTINGS ================= -->
+      <section id="view-settings" class="tab-view hidden space-y-6">
+        <div class="pt-2">
+          <h2 class="text-2xl font-bold text-slate-900">Disha Portal Settings</h2>
+          <p class="text-sm text-slate-500">Configure evaluation weighting, Prashiksha synchronization, and profile preferences</p>
+        </div>
+
+        <div class="dashboard-card p-6 max-w-2xl space-y-5">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 mb-3">Evaluation Rubric Weights</h3>
+            <div class="space-y-3">
+              <div>
+                <div class="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>Assignments & Problem Solving</span>
+                  <span class="tabular-nums font-semibold">40%</span>
+                </div>
+                <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-black rounded-full" style="width: 40%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>Class Attendance & Participation</span>
+                  <span class="tabular-nums font-semibold">25%</span>
+                </div>
+                <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-slate-700 rounded-full" style="width: 25%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>Mid-Term & AI Diagnostic Quizzes</span>
+                  <span class="tabular-nums font-semibold">35%</span>
+                </div>
+                <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-slate-500 rounded-full" style="width: 35%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+            <a href="index.html" onclick="handleLogout(); return false;" class="text-xs font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1.5 transition">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+              <span>Log Out of Disha Portal</span>
+            </a>
+            <button onclick="showToast('Settings saved successfully!')" class="btn-view bg-black text-white hover:bg-slate-800">
+              Save Settings
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================= MODAL: DETAILED STUDENT EVALUATION ================= -->
+  <div id="studentEvaluationModal" class="hidden fixed inset-0 z-50 modal-backdrop items-center justify-center p-4">
+    <div class="modal-card bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl relative border border-slate-200">
+      
+      <!-- Close Button -->
+      <button onclick="closeStudentModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 absolute right-4 top-4 transition">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Student Header -->
+      <div class="flex items-center gap-3.5 pb-4 border-b border-slate-100">
+        <span class="avatar-initial text-base w-12 h-12" id="modalStudentInitial">A</span>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-lg font-bold text-slate-900" id="modalStudentName">Aarav Sharma</h3>
+            <span class="status-pill text-xs" id="modalStudentStatus">Excellent</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5" id="modalStudentClass">CSE 1st Year</p>
+        </div>
+      </div>
+
+      <!-- Key Scores -->
+      <div class="grid grid-cols-3 gap-3 my-4">
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-center">
+          <div class="text-[11px] text-slate-500 font-medium">Overall Score</div>
+          <div class="text-xl font-bold text-slate-900 mt-0.5 tabular-nums" id="modalStudentScore">89%</div>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-center">
+          <div class="text-[11px] text-slate-500 font-medium">Attendance</div>
+          <div class="text-xl font-bold text-slate-900 mt-0.5 tabular-nums" id="modalStudentAttendance">94%</div>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-center">
+          <div class="text-[11px] text-slate-500 font-medium">Assignments</div>
+          <div class="text-xl font-bold text-slate-900 mt-0.5 tabular-nums" id="modalStudentAssignments">14/14</div>
+        </div>
+      </div>
+
+      <!-- Strengths & Weakness -->
+      <div class="space-y-3 text-xs">
+        <div>
+          <span class="font-bold text-slate-900">Identified Strengths:</span>
+          <p class="text-slate-600 mt-0.5" id="modalStudentStrengths">Algorithmic thinking, discrete logic, fast learner</p>
+        </div>
+        <div>
+          <span class="font-bold text-slate-900">Areas Needing Attention:</span>
+          <p class="text-slate-600 mt-0.5" id="modalStudentWeakness">Can elaborate more on theoretical proofs</p>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <div class="flex items-center gap-1.5 font-bold text-slate-900 mb-1">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-black"></i>
+            <span>Disha AI Recommendation:</span>
+          </div>
+          <p class="text-slate-700 leading-relaxed" id="modalAiRecommendation">
+            Ready for advanced competitive programming modules in Prashiksha.
+          </p>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+        <button onclick="closeStudentModal()" class="btn-view text-xs">
+          Close
+        </button>
+        <button onclick="showToast('Evaluation note synced to Prashiksha student portal!'); closeStudentModal();" class="btn-view bg-black text-white hover:bg-slate-800 text-xs">
+          Send Feedback to Student
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL: FULL SCREEN / EXPANDED TEACHER DETAILS ================= -->
+  <div id="teacherProfileModal" class="hidden fixed inset-0 z-50 modal-backdrop items-center justify-center p-4 overflow-y-auto">
+    <div class="modal-card bg-white rounded-3xl max-w-4xl w-full shadow-2xl relative border border-slate-200 overflow-hidden my-6">
+      
+      <!-- Top Banner Header (Obsidian Dark with Cover) -->
+      <div class="bg-[#0c0d0f] text-white p-6 md:p-8 relative overflow-hidden">
+        <!-- Subtle radial glow -->
+        <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+
+        <!-- Close button -->
+        <button onclick="closeTeacherProfileModal()" aria-label="Close" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white absolute right-5 top-5 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+          <!-- Big Avatar -->
+          <div class="relative shrink-0">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-slate-200 to-white text-slate-900 flex items-center justify-center font-extrabold text-2xl shadow-xl border-2 border-white/20">
+              AS
+            </div>
+            <span class="w-4 h-4 rounded-full bg-emerald-500 absolute -bottom-1 -right-1 ring-2 ring-[#0c0d0f]"></span>
+          </div>
+
+          <!-- Name & Designation -->
+          <div class="space-y-1">
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <h2 class="text-2xl font-bold tracking-tight text-white">Dr. Ananya Sharma</h2>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold">
+                Active Faculty
+              </span>
+            </div>
+            <p class="text-sm text-slate-300 font-medium">Senior Associate Professor & Head of CS Pedagogy</p>
+            <div class="flex items-center gap-4 text-xs text-slate-400 pt-1 flex-wrap">
+              <span class="flex items-center gap-1.5"><i data-lucide="building" class="w-3.5 h-3.5"></i> Computer Science & Engineering</span>
+              <span class="flex items-center gap-1.5"><i data-lucide="badge-check" class="w-3.5 h-3.5"></i> ID: FAC-2026-CSE-402</span>
+              <span class="flex items-center gap-1.5"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> Faculty since 2018 (8 Yrs)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Profile Content Body (Two Columns) -->
+      <div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 bg-slate-50/50">
+        
+        <!-- Left Column: Contact, Office, Academic Bio (md:col-span-5) -->
+        <div class="md:col-span-5 space-y-4">
+          
+          <!-- Contact Card -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="mail" class="w-4 h-4 text-slate-700"></i>
+              <span>Official Contact & Office</span>
+            </h4>
+            <div class="space-y-2 text-xs">
+              <div>
+                <span class="text-slate-400 block text-[11px]">Work Email</span>
+                <span class="font-semibold text-slate-800">ananya.sharma@prashiksha.edu</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[11px]">Direct Phone & Extension</span>
+                <span class="font-semibold text-slate-800">+91 (0) 522-2984120 · Ext. 402</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[11px]">Faculty Cabin</span>
+                <span class="font-semibold text-slate-800">Academic Block B, Room 402, 4th Floor</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[11px]">Office Hours for Students</span>
+                <span class="font-semibold text-slate-800">Monday – Thursday: 2:00 PM – 4:30 PM</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Academic Qualifications -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="graduation-cap" class="w-4 h-4 text-slate-700"></i>
+              <span>Academic Credentials</span>
+            </h4>
+            <div class="space-y-2.5 text-xs">
+              <div class="border-l-2 border-slate-800 pl-3">
+                <div class="font-bold text-slate-900">Ph.D. in Computer Science</div>
+                <div class="text-slate-500 text-[11px]">Indian Institute of Technology (IIT Bombay) · 2014-2018</div>
+                <div class="text-slate-400 text-[10.5px]">Focus: Scalable Graph Traversal & Parallel Memory Systems</div>
+              </div>
+              <div class="border-l-2 border-slate-300 pl-3">
+                <div class="font-bold text-slate-900">M.Tech in Software Systems</div>
+                <div class="text-slate-500 text-[11px]">Department of Computing · Gold Medalist</div>
+              </div>
+              <div class="border-l-2 border-slate-300 pl-3">
+                <div class="font-bold text-slate-900">B.Tech in Computer Science</div>
+                <div class="text-slate-500 text-[11px]">Graduated First Class with Distinction</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Teaching Load, Metrics, Research (md:col-span-7) -->
+        <div class="md:col-span-7 space-y-4">
+          
+          <!-- Key Teaching Stats -->
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm text-center">
+              <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Students</span>
+              <div class="text-2xl font-bold text-slate-900 mt-0.5 tabular-nums">48</div>
+              <span class="text-[10.5px] text-slate-400">Across 3 Batches</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm text-center">
+              <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Avg Mastery</span>
+              <div class="text-2xl font-bold text-slate-900 mt-0.5 tabular-nums">78%</div>
+              <span class="text-[10.5px] text-emerald-600 font-medium">↑ 6% this month</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm text-center">
+              <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Faculty Rating</span>
+              <div class="text-2xl font-bold text-slate-900 mt-0.5 tabular-nums">4.9<span class="text-sm font-normal text-slate-400">/5</span></div>
+              <span class="text-[10.5px] text-slate-400">Student Feedback</span>
+            </div>
+          </div>
+
+          <!-- Active Batches Assigned -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="book-open" class="w-4 h-4 text-slate-700"></i>
+                <span>Active Batches & Courses (Academic Year 2026)</span>
+              </h4>
+              <span class="text-xs font-semibold text-slate-500">3 Courses</span>
+            </div>
+
+            <div class="space-y-2.5">
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-slate-900 text-xs">CSE 1st Year · Batch A</div>
+                  <div class="text-[11px] text-slate-500">Fundamentals of Programming & C++ Architecture</div>
+                </div>
+                <span class="text-xs font-bold text-slate-800 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                  16 Students · 82% Avg
+                </span>
+              </div>
+
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-slate-900 text-xs">CSE 2nd Year · Batch B</div>
+                  <div class="text-[11px] text-slate-500">Advanced Data Structures & Graph Algorithms</div>
+                </div>
+                <span class="text-xs font-bold text-slate-800 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                  18 Students · 76% Avg
+                </span>
+              </div>
+
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-slate-900 text-xs">CSE 3rd Year · Batch C</div>
+                  <div class="text-[11px] text-slate-500">Operating Systems & Virtual Memory Paging</div>
+                </div>
+                <span class="text-xs font-bold text-slate-800 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                  14 Students · 69% Avg
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Research & Roles -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="award" class="w-4 h-4 text-slate-700"></i>
+              <span>Faculty Responsibilities & Research</span>
+            </h4>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Serving as **Departmental Curriculum Review Chair** and **Disha AI Faculty Lead**. Author of 14 IEEE/ACM peer-reviewed papers on compiler optimizations, cache architectures, and educational learning analytics.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Modal Footer with Actions and Logout -->
+      <div class="p-6 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <button onclick="showToast('Faculty Dossier exported as PDF!');" class="btn-view text-xs flex items-center gap-2 w-full sm:w-auto justify-center">
+          <i data-lucide="file-down" class="w-4 h-4 text-slate-600"></i>
+          <span>Download Faculty Dossier (PDF)</span>
+        </button>
+
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <button onclick="closeTeacherProfileModal()" class="btn-view text-xs px-5">
+            Close
+          </button>
+          <button onclick="handleLogout()" class="px-5 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-2 transition shadow-sm shadow-rose-600/20">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+            <span>Log Out of Session</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= GENERIC ACTION MODAL ================= -->
+  <div id="actionGenericModal" class="hidden fixed inset-0 z-50 modal-backdrop items-center justify-center p-4">
+    <div class="modal-card bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-200">
+      <button onclick="closeActionModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 absolute right-4 top-4 transition">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <h3 class="text-lg font-bold text-slate-900" id="actionModalTitle">Action Title</h3>
+      <p class="text-xs text-slate-500 mt-0.5 mb-4" id="actionModalDescription">Action description</p>
+
+      <div id="actionModalFormContent"></div>
+
+      <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+        <button onclick="closeActionModal()" class="btn-view text-xs">Cancel</button>
+        <button onclick="submitActionModal()" class="btn-view bg-black text-white hover:bg-slate-800 text-xs">Confirm & Sync to Prashiksha</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+
+  <!-- ====================================================================
+       SUBJECT STUDY LOG MODAL (Lists all things student studied in category)
+  ==================================================================== -->
+  <div id="subjectStudyLogModal" class="hidden fixed inset-0 z-50 modal-backdrop items-center justify-center p-4">
+    <div class="modal-card bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl relative border border-slate-200 max-h-[90vh] flex flex-col">
+      
+      <!-- Close Button -->
+      <button onclick="closeSubjectStudyModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 absolute right-4 top-4 transition">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="pb-4 border-b border-slate-100 pr-10">
+        <div class="flex items-center gap-2">
+          <span id="studyModalSubjectIcon" class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+          </span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 id="studyModalSubjectTitle" class="text-lg font-bold text-slate-900">Data Structures & Algorithms</h3>
+              <span id="studyModalTopicCountBadge" class="text-[10.5px] px-2 py-0.5 font-semibold rounded-full bg-blue-50 text-blue-600 border border-blue-200">6 Topics Studied</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Prashiksha learning log for <span id="studyModalStudentName" class="font-semibold text-slate-700">Aarav Sharma</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick Summary Bar inside modal (With Last Topic Opened) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4 pt-3 border-t border-slate-100 text-xs">
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+            <div class="text-slate-400 text-[10.5px] uppercase font-semibold">Subject Mastery</div>
+            <div id="studyModalMastery" class="text-base font-bold text-slate-900 mt-0.5">92%</div>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+            <div class="text-slate-400 text-[10.5px] uppercase font-semibold">Flashcard Score</div>
+            <div id="studyModalFlashcards" class="text-base font-bold text-slate-900 mt-0.5">95% (28/29)</div>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+            <div class="text-slate-400 text-[10.5px] uppercase font-semibold">Study Duration</div>
+            <div id="studyModalDuration" class="text-base font-bold text-slate-900 mt-0.5">14.5 Hours</div>
+          </div>
+          <div class="p-2.5 rounded-xl bg-blue-50/80 border border-blue-100">
+            <div class="text-blue-700 text-[10.5px] uppercase font-bold flex items-center gap-1">
+              <i data-lucide="clock" class="w-3 h-3 text-blue-600"></i>
+              <span>Last Topic Opened</span>
+            </div>
+            <div id="studyModalLastOpenedTime" class="text-xs font-black text-slate-900 mt-0.5 truncate">Today at 4:15 PM</div>
+            <div id="studyModalLastOpenedTopic" class="text-[10px] text-blue-800 font-medium truncate mt-0.5">Binary Trees & AVL</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Filter bar for topics -->
+      <div class="py-3 flex items-center justify-between gap-3">
+        <div class="relative w-full">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input 
+            id="studyModalSearchInput"
+            type="text" 
+            placeholder="Filter studied topics, keywords, or mode..." 
+            onkeyup="filterSubjectTopicsList(this.value)"
+            class="w-full text-xs pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+          />
+        </div>
+        <span class="text-[11px] font-medium text-slate-400 whitespace-nowrap">Source: Prashiksha DB</span>
+      </div>
+
+      <!-- Studied Topics List (Scrollable) -->
+      <div id="studyModalTopicsContainer" class="flex-1 overflow-y-auto space-y-2.5 pr-1">
+        <!-- Rendered dynamically via renderSubjectTopicsList() -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+        <span>Synced with student session & flashcard attempts</span>
+        <button onclick="closeSubjectStudyModal()" class="btn-view text-xs">
+          Close List
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ====================================================================
+       CREATE & FLOAT ASSIGNMENT MODAL (File Upload + Deadline + Class Select)
+  ==================================================================== -->
+  <div id="createAssignmentModal" class="hidden fixed inset-0 z-50 modal-backdrop items-center justify-center p-4">
+    <div class="modal-card bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative border border-slate-200 max-h-[92vh] flex flex-col">
+      
+      <!-- Close Button -->
+      <button onclick="closeCreateAssignmentModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 absolute right-4 top-4 transition">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="pb-4 border-b border-slate-100 pr-10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+            <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 tracking-tight">Create & Float New Assignment</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Upload problem sheet, set deadline, and broadcast to student Prashiksha workspaces</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Form Body (Scrollable) -->
+      <form id="createAssignmentForm" onsubmit="submitCreateAndFloatAssignment(event)" class="flex-1 overflow-y-auto space-y-4 py-4 pr-1">
+        
+        <!-- Assignment Title -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            Assignment Title <span class="text-rose-500">*</span>
+          </label>
+          <div class="relative">
+            <i data-lucide="file-text" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input 
+              id="newAssignTitle" 
+              type="text" 
+              required
+              placeholder="e.g. Problem Set #04: Graph Algorithms & Minimum Spanning Trees"
+              class="w-full text-xs pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+            />
+          </div>
+        </div>
+
+        <!-- Class Selection & Subject Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          
+          <!-- Select Target Class -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Target Class (Mam's Batch) <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="graduation-cap" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <select 
+                id="newAssignClass" 
+                required 
+                onchange="updateFloatingClassPreview(this.value)"
+                class="w-full text-xs pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+              >
+                <option value="CSE 2nd Year">CSE 2nd Year (18 Students · DSA)</option>
+                <option value="CSE 1st Year">CSE 1st Year (16 Students · Logic & C++)</option>
+                <option value="CSE 3rd Year">CSE 3rd Year (14 Students · Operating Systems)</option>
+                <option value="All Classes">All Batches (48 Students Combined)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Subject / Category -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Subject Category <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="book-open" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <select 
+                id="newAssignSubject" 
+                required 
+                class="w-full text-xs pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+              >
+                <option value="Data Structures & Algorithms">Data Structures & Algorithms</option>
+                <option value="Operating Systems & Architecture">Operating Systems & Architecture</option>
+                <option value="Database Management Systems">Database Management Systems</option>
+                <option value="Natural Sciences & AI Foundations">Natural Sciences & AI Foundations</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Floating Target Distribution Preview Box -->
+        <div id="floatingTargetPreview" class="floating-target-box flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-dot"></span>
+            <div>
+              <span class="font-bold text-slate-900" id="previewTargetClassText">CSE 2nd Year</span>
+              <span class="text-slate-500"> — Floats to </span>
+              <span class="font-bold text-blue-600" id="previewStudentCountText">18 enrolled students</span>
+              <span class="text-slate-500"> in Prashiksha</span>
+            </div>
+          </div>
+          <span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            Auto-Sync Ready
+          </span>
+        </div>
+
+        <!-- Deadline (Due Date & Time) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Submission Deadline Date <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="calendar" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input 
+                id="newAssignDate" 
+                type="date" 
+                required
+                class="w-full text-xs pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Deadline Time <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="clock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input 
+                id="newAssignTime" 
+                type="time" 
+                value="23:59"
+                required
+                class="w-full text-xs pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- File Upload Drag & Drop Zone -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+            <span>Assignment File / Problem Sheet <span class="text-rose-500">*</span></span>
+            <span class="text-[11px] font-normal text-slate-400">PDF, Word, Code, ZIP (Max 25MB)</span>
+          </label>
+
+          <!-- Hidden Input -->
+          <input 
+            type="file" 
+            id="assignmentFileInput" 
+            accept=".pdf,.doc,.docx,.txt,.zip,.py,.cpp,.java,.sql"
+            class="hidden" 
+            onchange="handleAssignmentFileSelect(event)"
+          />
+
+          <!-- Interactive Drop Zone -->
+          <div 
+            id="fileDropZone" 
+            onclick="document.getElementById('assignmentFileInput').click()"
+            class="file-drop-zone"
+          >
+            <div class="flex flex-col items-center justify-center gap-1.5">
+              <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                <i data-lucide="upload" class="w-5 h-5"></i>
+              </div>
+              <div class="text-xs font-semibold text-slate-800 pt-1">
+                <span class="text-blue-600 hover:underline">Click to upload file</span> or drag and drop problem sheet
+              </div>
+              <p class="text-[11px] text-slate-400">PDF problem statement, grading rubric, or starter code</p>
+            </div>
+          </div>
+
+          <!-- Preview Card for Selected File -->
+          <div id="selectedFilePreviewContainer" class="hidden"></div>
+        </div>
+
+        <!-- AI Diagnostic 10-Second Rapid Quiz Generator (Powered by Gemini API) -->
+        <div class="mt-2 p-4 rounded-2xl bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-purple-50/80 border border-blue-200/80 space-y-3" id="geminiQuizGeneratorSection">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-sm shrink-0">
+                <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="text-xs font-bold text-slate-900 tracking-tight">Gemini Agent Document-Reading Quiz</h4>
+                  <span class="text-[9.5px] px-2 py-0.5 rounded-full font-bold bg-blue-100 text-blue-700 uppercase">5 Questions • 10s Timer</span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-0.5">Gemini agent reads your attached PDF/Word file and generates a 5-question comprehension quiz directly from the document</p>
+              </div>
+            </div>
+
+            <button 
+              type="button" 
+              id="btnGenerateGeminiQuiz"
+              onclick="generateQuizWithGeminiFromAssignment()" 
+              class="btn-view bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition whitespace-nowrap shrink-0"
+              title="Prompts the Gemini Agent to read the attached assignment file and create questions"
+            >
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+              <span>Generate Quiz with Gemini Agent</span>
+            </button>
+          </div>
+
+          <!-- Generating Status / Spinner -->
+          <div id="geminiQuizStatus" class="hidden text-xs font-semibold text-blue-700 flex items-center gap-2 py-1">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping"></span>
+            <span id="geminiQuizStatusText">Gemini agent is reading your attached assignment file and crafting 5 conceptual questions...</span>
+          </div>
+
+          <div id="geminiQuizPreviewContainer" class="hidden space-y-2 pt-2 border-t border-blue-200/60">
+            <div class="flex items-center justify-between">
+              <div class="text-[11px] font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+                <span>5 Rapid Questions Generated · 10s Timer Attached</span>
+              </div>
+              <button 
+                type="button"
+                onclick="openQuizSimulatorModal(null, true)"
+                class="text-xs font-bold text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
+              >
+                <i data-lucide="play" class="w-3 h-3"></i>
+                <span>Preview Student 10s Experience</span>
+              </button>
+            </div>
+
+            <!-- Questions List Accordion -->
+            <div id="geminiGeneratedQuestionsList" class="space-y-1.5 max-h-48 overflow-y-auto pr-1 text-xs">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+
+
+        <!-- Instructions & Max Marks -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3.5">
+          <div class="sm:col-span-3">
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Instructions & AI Tutor Guidance
+            </label>
+            <textarea 
+              id="newAssignInstructions" 
+              rows="2" 
+              placeholder="E.g. Submit C++ or Python implementation. Prashiksha AI Hint Mode will be active."
+              class="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+            ></textarea>
+          </div>
+          <div class="sm:col-span-1">
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Max Points
+            </label>
+            <input 
+              id="newAssignMaxMarks" 
+              type="number" 
+              value="100" 
+              min="10" 
+              max="200" 
+              class="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-bold text-center focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+            />
+          </div>
+        </div>
+
+        <!-- Floating Options Toggles -->
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2 text-xs">
+          <label class="flex items-center gap-2.5 cursor-pointer text-slate-700 font-medium">
+            <input type="checkbox" id="toggleFloatImmediately" checked class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500" />
+            <span>Float immediately to all Prashiksha student dashboards in this class</span>
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer text-slate-700 font-medium">
+            <input type="checkbox" id="toggleAiHintMode" checked class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500" />
+            <span>Enable Prashiksha AI Tutor progressive hints for this problem sheet</span>
+          </label>
+        </div>
+
+      </form>
+
+      <!-- Modal Footer -->
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+        <button onclick="closeCreateAssignmentModal()" type="button" class="btn-view text-xs">
+          Cancel
+        </button>
+        <button 
+          onclick="document.getElementById('createAssignmentForm').requestSubmit()" 
+          type="button" 
+          class="btn-view bg-[#0B63E5] hover:bg-[#094EC2] text-white font-bold text-xs flex items-center gap-2 px-5 py-2.5 rounded-xl shadow-md shadow-blue-500/20 active:scale-95 transition"
+        >
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>Publish & Float to Prashiksha</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ====================================================================
+       INTERACTIVE 10-SECOND QUIZ SIMULATOR MODAL (Student Post-Submission View)
+  ==================================================================== -->
+  <div id="quizSimulatorModal" class="hidden fixed inset-0 z-50 modal-backdrop items-center justify-center p-4">
+    <div class="modal-card bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-200 overflow-hidden flex flex-col">
+      
+      <!-- Close Button -->
+      <button onclick="closeQuizSimulatorModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 absolute right-4 top-4 transition z-10">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Simulator Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 pr-10">
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-xs">
+            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+          </span>
+          <div>
+            <div class="text-[10.5px] uppercase font-bold text-slate-400 tracking-wider">Prashiksha Student Post-Submission Quiz</div>
+            <div id="simQuizTitle" class="text-sm font-bold text-slate-900 truncate max-w-[280px]">Assignment Verification</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <span id="simQuestionCounter" class="text-xs font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">Q 1 of 5</span>
+        </div>
+      </div>
+
+      <!-- Active Quiz View -->
+      <div id="simActiveQuizView" class="py-4 space-y-4">
+        
+        <!-- 10-Second Timer Bar & Countdown -->
+        <div>
+          <div class="flex items-center justify-between text-xs mb-1.5 font-bold">
+            <span class="flex items-center gap-1.5 text-slate-500">
+              <i data-lucide="timer" class="w-3.5 h-3.5 text-amber-500"></i>
+              <span>Time Remaining:</span>
+            </span>
+            <span id="simTimerDigits" class="text-sm font-black text-amber-600 tabular-nums">10.0s</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden relative">
+            <div id="simTimerProgressBar" class="h-full bg-amber-500 rounded-full transition-all duration-100 ease-linear" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <!-- Very Short, One-Line Question -->
+        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div class="text-[10px] uppercase font-bold text-blue-600 tracking-wider mb-1">Conceptual Check (10s)</div>
+          <div id="simQuestionText" class="text-base font-extrabold text-slate-900 leading-snug">
+            What is the worst-case search time in an unbalanced BST?
+          </div>
+        </div>
+
+        <!-- 4 Short Single-Line Options -->
+        <div class="space-y-2" id="simOptionsContainer">
+          <!-- Populated via renderSimulatorQuestion() -->
+        </div>
+
+        <!-- Explanation Toast (Shown on Answer) -->
+        <div id="simExplanationBanner" class="hidden p-3 rounded-xl bg-slate-100 border border-slate-200 text-xs text-slate-700 fade-in">
+          <div class="font-bold mb-0.5" id="simExplanationStatus">Correct!</div>
+          <div id="simExplanationText" class="text-slate-600 leading-relaxed">Explanation note...</div>
+        </div>
+
+      </div>
+
+      <!-- Completed Results View (Hidden Initially) -->
+      <div id="simCompletedView" class="hidden py-6 text-center space-y-4">
+        <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center font-bold text-2xl shadow-inner">
+          <i data-lucide="award" class="w-8 h-8"></i>
+        </div>
+        <div>
+          <div class="text-xs uppercase font-bold text-emerald-600 tracking-wider">Post-Assignment Quiz Completed</div>
+          <h3 class="text-2xl font-black text-slate-900 mt-1" id="simFinalScoreText">5 / 5 Correct (100%)</h3>
+          <p class="text-xs text-slate-500 mt-1">Student understanding verified. Results logged to Prashiksha telemetry.</p>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 max-w-sm mx-auto">
+          <div class="font-bold text-slate-800 mb-1">Prashiksha Automated Grade:</div>
+          <div>All 5 rapid-fire questions answered within the 10-second limit. Mastery score updated to <strong>95%</strong>.</div>
+        </div>
+        <div class="pt-2 flex items-center justify-center gap-3">
+          <button onclick="restartSimulatorQuiz()" class="btn-view text-xs flex items-center gap-1.5">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span>Try Again</span>
+          </button>
+          <button onclick="closeQuizSimulatorModal()" class="btn-view bg-blue-600 text-white font-bold text-xs hover:bg-blue-700">
+            Close Simulator
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+        <span>Prashiksha Rapid Verification System</span>
+        <span class="font-semibold text-slate-600">10 Secs Per Question</span>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ====================================================================
+       CREATE & SCHEDULE CUSTOM QUIZ MODAL (Teacher Authors Questions & Answers)
+  ==================================================================== -->
+  <div id="createCustomQuizModal" class="hidden fixed inset-0 z-50 modal-backdrop items-center justify-center p-4">
+    <div class="modal-card bg-white rounded-3xl max-w-3xl w-full p-6 shadow-2xl relative border border-slate-200 max-h-[92vh] flex flex-col">
+      
+      <!-- Close Button -->
+      <button onclick="closeCreateCustomQuizModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 absolute right-4 top-4 transition z-10">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="pb-4 border-b border-slate-100 pr-10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold shadow-sm">
+            <i data-lucide="help-circle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 tracking-tight">Create & Schedule Custom Quiz</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Author your questions and answers, set quiz schedule & duration, and select target class</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Form Body (Scrollable) -->
+      <form id="createCustomQuizForm" onsubmit="submitCreateAndScheduleQuiz(event)" class="flex-1 overflow-y-auto space-y-4 py-4 pr-1">
+        
+        <!-- Quiz Title -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            Quiz Title <span class="text-rose-500">*</span>
+          </label>
+          <div class="relative">
+            <i data-lucide="help-circle" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input 
+              id="customQuizTitle" 
+              type="text" 
+              required
+              placeholder="e.g. Weekly Knowledge Check: Graph Algorithms & Minimum Spanning Trees"
+              class="w-full text-xs pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+            />
+          </div>
+        </div>
+
+        <!-- Class Selection & Subject Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          
+          <!-- Select Target Class (Whom to send quiz) -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Whom Class to Send Quiz <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="graduation-cap" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <select 
+                id="customQuizClass" 
+                required 
+                onchange="updateQuizTargetClassPreview(this.value)"
+                class="w-full text-xs pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+              >
+                <option value="CSE 2nd Year">CSE 2nd Year (18 Students · DSA)</option>
+                <option value="CSE 1st Year">CSE 1st Year (16 Students · Logic & C++)</option>
+                <option value="CSE 3rd Year">CSE 3rd Year (14 Students · Operating Systems)</option>
+                <option value="All Classes">All Batches (48 Students Combined)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Subject / Category -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Subject Category <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="book-open" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <select 
+                id="customQuizSubject" 
+                required 
+                class="w-full text-xs pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+              >
+                <option value="Data Structures & Algorithms">Data Structures & Algorithms</option>
+                <option value="Operating Systems & Architecture">Operating Systems & Architecture</option>
+                <option value="Database Management Systems">Database Management Systems</option>
+                <option value="Natural Sciences & AI Foundations">Natural Sciences & AI Foundations</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Floating Target Distribution Preview Box -->
+        <div id="quizTargetClassPreview" class="floating-target-box flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-dot"></span>
+            <div>
+              <span class="font-bold text-slate-900" id="quizPreviewTargetClassText">CSE 2nd Year</span>
+              <span class="text-slate-500"> — Scheduled quiz will appear on dashboards of </span>
+              <span class="font-bold text-blue-600" id="quizPreviewStudentCountText">18 enrolled students</span>
+              <span class="text-slate-500"> in Prashiksha</span>
+            </div>
+          </div>
+          <span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            Target Sync Ready
+          </span>
+        </div>
+
+        <!-- Schedule Date, Time & Duration of Quiz Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          
+          <!-- Scheduled Date -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Quiz Date <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="calendar" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input 
+                id="customQuizDate" 
+                type="date" 
+                required
+                class="w-full text-xs pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+          </div>
+
+          <!-- Start Time -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Quiz Start Time <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="clock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input 
+                id="customQuizTime" 
+                type="time" 
+                value="10:00"
+                required
+                class="w-full text-xs pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+          </div>
+
+          <!-- Duration of Quiz -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Quiz Duration <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="timer" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <select 
+                id="customQuizDuration" 
+                required
+                class="w-full text-xs pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition"
+              >
+                <option value="10">10 Minutes (Rapid Test)</option>
+                <option value="15" selected>15 Minutes (Standard Check)</option>
+                <option value="20">20 Minutes (Detailed Diagnostic)</option>
+                <option value="30">30 Minutes (Comprehensive)</option>
+                <option value="45">45 Minutes (Full Assessment)</option>
+                <option value="60">60 Minutes (Final Exam Check)</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Questions Authoring Header (Sticky Top Bar so Add Question stays accessible while scrolling) -->
+        <div class="sticky top-0 z-20 bg-white/95 backdrop-blur-md pt-2 pb-3 border-b border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs">
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Author Questions & Answers</h4>
+              <span id="authorQuestionCounterBadge" class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold font-mono">0 Questions</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Teacher writes custom questions, 4 options, and selects the correct answer</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Persistent Add New Question Button (Always fixed at top during scrolling) -->
+            <button 
+              type="button" 
+              onclick="addAuthorQuestionField()" 
+              class="btn-view bg-[#0B63E5] hover:bg-[#094EC2] text-white text-xs flex items-center gap-2 font-bold px-4 py-2 rounded-xl shadow-md shadow-blue-500/25 active:scale-95 transition"
+              title="Add a clean blank question card at the bottom"
+            >
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>+ New Question</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Questions Builder Container -->
+        <div id="authorQuestionsContainer" class="space-y-4 pt-1">
+          <!-- Populated dynamically via addAuthorQuestionField() with clean blank question boxes -->
+        </div>
+
+        <!-- Student Delivery Toggles -->
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2 text-xs">
+          <label class="flex items-center gap-2.5 cursor-pointer text-slate-700 font-medium">
+            <input type="checkbox" id="toggleScheduleImmediateFloat" checked class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500" />
+            <span>Display scheduled quiz card on student Prashiksha dashboard for selected class</span>
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer text-slate-700 font-medium">
+            <input type="checkbox" id="toggleShowQuizCountdown" checked class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500" />
+            <span>Show live start-time countdown to enrolled students in Prashiksha</span>
+          </label>
+        </div>
+
+      </form>
+
+      <!-- Modal Footer (With Persistent Floating Add Question & Action Buttons) -->
+      <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+        <div class="flex items-center gap-2">
+          <button onclick="closeCreateCustomQuizModal()" type="button" class="btn-view text-xs">
+            Cancel
+          </button>
+          <!-- Additional persistent bottom shortcut for Add Question -->
+          <button 
+            type="button" 
+            onclick="addAuthorQuestionField()" 
+            class="btn-view bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs flex items-center gap-1.5 font-bold px-3 py-2 rounded-xl transition"
+          >
+            <i data-lucide="plus" class="w-3.5 h-3.5 text-blue-600"></i>
+            <span>+ Add Another Question</span>
+          </button>
+        </div>
+        <button 
+          onclick="document.getElementById('createCustomQuizForm').requestSubmit()" 
+          type="button" 
+          class="btn-view bg-[#0B63E5] hover:bg-[#094EC2] text-white font-bold text-xs flex items-center gap-2 px-5 py-2.5 rounded-xl shadow-md shadow-blue-500/20 active:scale-95 transition"
+        >
+          <i data-lucide="calendar-check" class="w-4 h-4"></i>
+          <span>Schedule & Float Quiz to Prashiksha</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

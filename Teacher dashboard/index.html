@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Disha — Teacher Portal</title>
+  
+  <!-- Auto-redirect to dashboard if already authenticated in this session -->
+  <script>
+    if (sessionStorage.getItem('disha_logged_in') === 'true') {
+      window.location.replace('dashboard.html');
+    }
+  </script>
+
+    <!-- Early Theme State Init -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('disha_theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    })();
+  </script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            brandDark: '#0c0d0f',
+            sidebarActive: '#1f2127',
+            canvas: '#f8f9fa',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      background-color: #f8f9fa;
+      color: #0f172a;
+    }
+    .fade-in {
+      animation: fadeIn 0.4s var(--ease-spring) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .auth-card {
+      box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+      transition: all 0.25s var(--ease-spring);
+    }
+    .input-field {
+      transition: all 0.2s ease;
+    }
+    .input-field:focus {
+      border-color: #0f172a;
+      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+    }
+    .btn-primary {
+      background-color: #0f172a;
+      transition: all 0.2s var(--ease-spring);
+    }
+    .btn-primary:hover {
+      background-color: #1e293b;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px -4px rgba(15, 23, 42, 0.25);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+  
+    /* Light Mode (White & Blue default) */
+    :root {
+      --bg-canvas: #f4f7fc;
+      --card-bg: #ffffff;
+      --hero-bg: #0B63E5;
+      --btn-primary: #0B63E5;
+      --btn-hover: #094EC2;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --input-bg: #f8fafc;
+    }
+    body.dark-mode {
+      --bg-canvas: #0c0d11;
+      --card-bg: #16181f;
+      --hero-bg: #14161c;
+      --btn-primary: #38BDF8;
+      --btn-hover: #0284c7;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --input-bg: #1c1e26;
+    }
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    .auth-card {
+      background-color: var(--card-bg) !important;
+      border-color: var(--border-color) !important;
+    }
+    .hero-col {
+      background-color: var(--hero-bg) !important;
+      transition: background-color 0.25s ease;
+    }
+    .input-field {
+      background-color: var(--input-bg) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-main) !important;
+    }
+    .input-field:focus {
+      border-color: var(--btn-primary) !important;
+      box-shadow: 0 0 0 3px rgba(11, 99, 229, 0.15) !important;
+    }
+    body.dark-mode .input-field:focus {
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+    }
+    .btn-primary {
+      background-color: var(--btn-primary) !important;
+      color: #ffffff !important;
+    }
+    body.dark-mode .btn-primary {
+      color: #0c0d11 !important;
+      font-weight: 800 !important;
+    }
+    .btn-primary:hover {
+      background-color: var(--btn-hover) !important;
+    }
+    body.dark-mode .text-slate-900 {
+      color: #f8fafc !important;
+    }
+    body.dark-mode .text-slate-700 {
+      color: #cbd5e1 !important;
+    }
+    body.dark-mode .text-slate-600 {
+      color: #94a3b8 !important;
+    }
+    body.dark-mode .text-slate-500 {
+      color: #94a3b8 !important;
+    }
+    body.dark-mode .border-slate-200 {
+      border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    body.dark-mode .border-slate-100 {
+      border-color: rgba(255, 255, 255, 0.07) !important;
+    }
+    body.dark-mode .bg-white {
+      background-color: #16181f !important;
+    }
+
+    /* Theme Toggle Switch on Login */
+    .login-theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-main);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      z-index: 50;
+      transition: all 0.2s ease;
+    }
+    .login-theme-toggle:hover {
+      transform: translateY(-1px);
+    }
+    .login-toggle-pill {
+      width: 30px;
+      height: 16px;
+      border-radius: 9999px;
+      background: #E2E8F0;
+      position: relative;
+      transition: background 0.25s ease;
+    }
+    .login-toggle-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ffffff;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.25s ease;
+    }
+    body.dark-mode .login-toggle-pill {
+      background: #38BDF8;
+    }
+    body.dark-mode .login-toggle-dot {
+      transform: translateX(14px);
+      background: #0c0d11;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 selection:bg-slate-900 selection:text-white">
+
+  <!-- Day / Night Mode Toggle -->
+  <button onclick="toggleLoginTheme()" type="button" class="login-theme-toggle" title="Toggle Light / Night mode">
+    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 login-sun-icon"></i>
+    <i data-lucide="moon" class="w-3.5 h-3.5 text-sky-400 login-moon-icon hidden"></i>
+    <div class="login-toggle-pill"><span class="login-toggle-dot"></span></div>
+    <span id="loginThemeText">Day</span>
+  </button>
+
+
+  <!-- Main Split Layout Container -->
+  <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-12 bg-white rounded-3xl overflow-hidden border border-slate-200/80 auth-card fade-in">
+    
+    <!-- Left Hero Brand Column (40% width) -->
+    <div class="md:col-span-5 hero-col text-white p-8 md:p-10 flex flex-col justify-between relative overflow-hidden">
+      <!-- Background subtle radial glow -->
+      <div class="absolute -top-24 -left-24 w-72 h-72 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div>
+        <!-- Brand Logo Header -->
+        <div class="flex items-center gap-3 mb-10">
+          <div class="text-white">
+            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 3C21 3 17 4 12 9C7 14 6 18 6 18C6 18 10 17 15 12C20 7 21 3 21 3Z" />
+              <path d="M3 21C3 21 5 19 8 16C11 13 14 10 14 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+          <div>
+            <div class="text-xl font-bold tracking-tight">Disha</div>
+            <div class="text-[11px] text-slate-400">Learn · Grow · Succeed</div>
+          </div>
+        </div>
+
+        <!-- Tagline & Hero Text -->
+        <div class="space-y-3">
+          <span class="inline-block px-2.5 py-1 rounded-md bg-white/10 text-emerald-300 text-[10.5px] font-semibold tracking-wider uppercase">
+            Disha Teacher Portal
+          </span>
+          <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white leading-snug">
+            Intelligent teaching insights at your fingertips.
+          </h2>
+          <p class="text-xs text-slate-400 leading-relaxed pt-1">
+            Access student evaluation rubrics, batch performance trends, and AI-powered diagnostic recommendations synced with the Prashiksha student network.
+          </p>
+        </div>
+
+        <!-- Mini Feature Badges -->
+        <div class="mt-8 space-y-2.5">
+          <div class="flex items-center gap-2.5 text-xs text-slate-300">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+            <span>Real-time student diagnostic evaluations</span>
+          </div>
+          <div class="flex items-center gap-2.5 text-xs text-slate-300">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+            <span>Batch performance & attendance analytics</span>
+          </div>
+          <div class="flex items-center gap-2.5 text-xs text-slate-300">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+            <span>One-click quiz & assignment generation</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Left Footer Quote & Signature Wave -->
+      <div class="pt-10 border-t border-white/10 mt-8">
+        <div class="text-xs text-white font-semibold">Better Learning</div>
+        <div class="text-[11px] text-slate-400">Builds a Brighter Future</div>
+        <div class="mt-2 text-white/30">
+          <svg width="42" height="10" viewBox="0 0 46 12" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M1 6C6 1 11 11 16 6C21 1 26 11 31 6C36 1 41 11 45 6" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Form Column (60% width) -->
+    <div class="md:col-span-7 p-8 md:p-12 flex flex-col justify-between">
+      <div>
+        
+        <!-- Welcome Header -->
+        <div class="mb-8">
+          <h3 class="text-2xl font-bold text-slate-900 tracking-tight">Good day, Instructor</h3>
+          <p class="text-xs text-slate-500 mt-1">Please enter your faculty credentials to access your dashboard.</p>
+        </div>
+
+        <!-- Form -->
+        <form id="teacherLoginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          
+          <!-- Email Input -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Institutional Email</label>
+            <div class="relative">
+              <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input 
+                id="loginEmail" 
+                type="email" 
+                required 
+                value="ananya.sharma@prashiksha.edu" 
+                placeholder="teacher@prashiksha.edu" 
+                class="input-field w-full text-sm pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white"
+              />
+            </div>
+          </div>
+
+          <!-- Password Input -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">Password</label>
+              <a href="#" onclick="alert('Password reset link sent to your registered institutional email.'); return false;" class="text-xs font-semibold text-slate-600 hover:text-black">
+                Forgot password?
+              </a>
+            </div>
+            <div class="relative">
+              <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input 
+                id="loginPassword" 
+                type="password" 
+                required 
+                value="teacher@2026" 
+                placeholder="••••••••••••" 
+                class="input-field w-full text-sm pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white"
+              />
+              <button 
+                type="button" 
+                onclick="togglePasswordVisibility()" 
+                class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 focus:outline-none"
+              >
+                <i id="eyeIcon" data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Remember Me & Role Indicator -->
+          <div class="flex items-center justify-between text-xs pt-1">
+            <label class="flex items-center gap-2 cursor-pointer text-slate-600">
+              <input type="checkbox" checked class="w-4 h-4 rounded text-slate-900 border-slate-300 focus:ring-slate-900" />
+              <span>Remember this workstation</span>
+            </label>
+            <span class="text-slate-400 flex items-center gap-1">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+              <span>Faculty 2FA active</span>
+            </span>
+          </div>
+
+          <!-- Error Alert Banner (Hidden by default) -->
+          <div id="loginErrorBanner" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600 shrink-0"></i>
+            <span id="loginErrorMessage">Invalid email or password.</span>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-2">
+            <button 
+              id="submitBtn" 
+              type="submit" 
+              class="btn-primary w-full py-3 px-4 rounded-xl text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm"
+            >
+              <span id="btnText">Sign In to Disha Portal</span>
+              <i id="btnArrow" data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+        </form>
+
+        <!-- Divider -->
+        <div class="relative my-6 text-center">
+          <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+          <span class="relative bg-white px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Or continue with</span>
+        </div>
+
+        <!-- Single Sign-On Button -->
+        <button 
+          onclick="quickSSOLogin()" 
+          class="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition text-xs font-semibold text-slate-700 flex items-center justify-center gap-2.5 shadow-sm"
+        >
+          <!-- Google G Logo SVG -->
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Campus Single Sign-On (SSO)</span>
+        </button>
+
+      </div>
+
+      <!-- Right Footer Note -->
+      <div class="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+        <span>Protected by Prashiksha Security</span>
+        <button onclick="quickGuestAccess()" class="font-semibold text-slate-600 hover:text-black">
+          Enter as Guest Instructor →
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    
+    // Theme Management for Login
+    function isDarkLogin() {
+      return document.body.classList.contains('dark-mode');
+    }
+
+    function applyInitialLoginTheme() {
+      const saved = localStorage.getItem('disha_theme') || 'light';
+      if (saved === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.documentElement.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+        document.documentElement.classList.remove('dark-mode');
+      }
+      updateLoginThemeUI();
+    }
+
+    function updateLoginThemeUI() {
+      const isDark = isDarkLogin();
+      const sun = document.querySelector('.login-sun-icon');
+      const moon = document.querySelector('.login-moon-icon');
+      const txt = document.getElementById('loginThemeText');
+      if (sun && moon) {
+        if (isDark) {
+          sun.classList.add('hidden');
+          moon.classList.remove('hidden');
+        } else {
+          sun.classList.remove('hidden');
+          moon.classList.add('hidden');
+        }
+      }
+      if (txt) {
+        txt.textContent = isDark ? 'Night' : 'Day';
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function toggleLoginTheme() {
+      const willBeDark = !isDarkLogin();
+      if (willBeDark) {
+        document.body.classList.add('dark-mode');
+        document.documentElement.classList.add('dark-mode');
+        localStorage.setItem('disha_theme', 'dark');
+      } else {
+        document.body.classList.remove('dark-mode');
+        document.documentElement.classList.remove('dark-mode');
+        localStorage.setItem('disha_theme', 'light');
+      }
+      updateLoginThemeUI();
+    }
+
+    // Call applyInitialLoginTheme on DOM ready
+    window.addEventListener("DOMContentLoaded", () => {
+      applyInitialLoginTheme();
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+
+    // Password visibility toggle
+    function togglePasswordVisibility() {
+      const pwdInput = document.getElementById("loginPassword");
+      const eyeIcon = document.getElementById("eyeIcon");
+      if (pwdInput.type === "password") {
+        pwdInput.type = "text";
+        eyeIcon.setAttribute("data-lucide", "eye-off");
+      } else {
+        pwdInput.type = "password";
+        eyeIcon.setAttribute("data-lucide", "eye");
+      }
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    // Handle Form Submit
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+      const submitBtn = document.getElementById("submitBtn");
+      const btnText = document.getElementById("btnText");
+      const errorBanner = document.getElementById("loginErrorBanner");
+
+      if (!email || !password) {
+        errorBanner.classList.remove("hidden");
+        document.getElementById("loginErrorMessage").textContent = "Please fill in all credentials.";
+        return;
+      }
+
+      // Simulate authenticating
+      submitBtn.disabled = true;
+      btnText.textContent = "Authenticating...";
+      errorBanner.classList.add("hidden");
+
+      setTimeout(() => {
+        // Successful authentication
+        sessionStorage.setItem('disha_logged_in', 'true');
+        btnText.textContent = "Welcome, Dr. Ananya Sharma!";
+        submitBtn.classList.remove("bg-[#0f172a]");
+        submitBtn.classList.add("bg-emerald-600");
+        
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 500);
+      }, 600);
+    }
+
+    // Quick SSO Login
+    function quickSSOLogin() {
+      const submitBtn = document.getElementById("submitBtn");
+      const btnText = document.getElementById("btnText");
+      submitBtn.disabled = true;
+      btnText.textContent = "SSO Authenticating...";
+      sessionStorage.setItem('disha_logged_in', 'true');
+      
+      setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 500);
+    }
+
+    // Guest Direct Access
+    function quickGuestAccess() {
+      sessionStorage.setItem('disha_logged_in', 'true');
+      window.location.href = "dashboard.html";
+    }
+  </script>
+</body>
+</html>

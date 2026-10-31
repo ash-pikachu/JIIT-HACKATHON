@@ -1,0 +1,6 @@
+# Local secrets and config
+config.js
+!config.example.js
+.env
+.env.*
+!.env.example

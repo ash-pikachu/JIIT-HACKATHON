@@ -8,12 +8,16 @@
             </div>
             <span class="brand-text">Prashiksha</span>
         </a>
-        <div class="student-chip">
+        <div class="student-chip student-chip-clickable" onclick="openClassroomDashboard()" title="Open Classroom Dashboard (Syllabus, Assignments, Quizzes & Progress)">
             <i data-lucide="user-round"></i>
-            <div>
-                <strong>{{ state.user.name }}</strong>
-                <small>{{ languages.get(state.language, "English") }}</small>
+            <div style="flex: 1;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+                    <strong>{{ state.user.name }}</strong>
+                    <span class="classroom-portal-badge" style="font-size: 9px; font-weight: 800; background: #e0e7ff; color: #4338ca; padding: 1px 6px; border-radius: 9999px; text-transform: uppercase;">Classroom</span>
+                </div>
+                <small>{{ languages.get(state.language, "English") }} • CSE 2nd Year</small>
             </div>
+            <i data-lucide="external-link" style="width: 13px; height: 13px; opacity: 0.6;"></i>
         </div>
         {% set level = state.understanding_level %}
         {% if level < 0.35 %}
@@ -273,4 +277,325 @@
         {% block content %}{% endblock %}
     </main>
 </div>
+
+<!-- ====================================================================
+     FULLSCREEN CLASSROOM DASHBOARD FOR PRANJAL SINGH
+==================================================================== -->
+<div id="classroomFullscreenDashboard" class="classroom-fullscreen-modal hidden">
+    <!-- Top Navigation Bar -->
+    <header class="classroom-topbar">
+        <div class="classroom-brand">
+            <div class="classroom-logo-badge">
+                <img src="/static/img/logo.png" alt="Prashiksha Logo" width="32" height="32">
+            </div>
+            <div>
+                <div class="classroom-title-row">
+                    <h2 class="classroom-student-name">Pranjal Singh</h2>
+                    <span class="classroom-class-tag">CSE 2nd Year &bull; Section A</span>
+                    <span class="classroom-status-live">
+                        <span class="pulse-dot-green"></span>
+                        <span>Synced with Teacher Portal (Dr. Ananya Sharma)</span>
+                    </span>
+                </div>
+                <p class="classroom-subtitle">Computer Science & Engineering &bull; Roll No: CSE-2026-084 &bull; Faculty: Dr. Ananya Sharma</p>
+            </div>
+        </div>
+
+        <div class="classroom-topbar-actions">
+            <!-- Fullscreen toggle / Close button -->
+            <button type="button" onclick="closeClassroomDashboard()" class="classroom-close-btn" title="Back to Prashiksha Tutor">
+                <i data-lucide="x"></i>
+                <span>Close Classroom</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs Bar -->
+    <nav class="classroom-nav-tabs">
+        <button type="button" class="classroom-tab-btn active" data-class-tab="hub" onclick="switchClassroomTab('hub')">
+            <i data-lucide="layout-grid"></i>
+            <span>Classroom Hub</span>
+        </button>
+        <button type="button" class="classroom-tab-btn" data-class-tab="syllabus" onclick="switchClassroomTab('syllabus')">
+            <i data-lucide="book-open"></i>
+            <span>Syllabus</span>
+        </button>
+        <button type="button" class="classroom-tab-btn" data-class-tab="assignments" onclick="switchClassroomTab('assignments')">
+            <i data-lucide="file-text"></i>
+            <span>Assignments</span>
+            <span class="classroom-badge" id="studentAsgnCountBadge">3 Active</span>
+        </button>
+        <button type="button" class="classroom-tab-btn" data-class-tab="quizzes" onclick="switchClassroomTab('quizzes')">
+            <i data-lucide="help-circle"></i>
+            <span>Quizzes</span>
+            <span class="classroom-badge" id="studentQuizCountBadge">2 Scheduled</span>
+        </button>
+        <button type="button" class="classroom-tab-btn" data-class-tab="progress" onclick="switchClassroomTab('progress')">
+            <i data-lucide="trending-up"></i>
+            <span>Whole Progress</span>
+        </button>
+        <button type="button" class="classroom-tab-btn" data-class-tab="results" onclick="switchClassroomTab('results')">
+            <i data-lucide="award"></i>
+            <span>Quiz Result</span>
+        </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="classroom-content-body">
+
+        <!-- ===============================================================
+             TAB 0: CLASSROOM HUB (CARDS FORMAT MATCHING STUDY MODES)
+        =============================================================== -->
+        <section id="classTab-hub" class="classroom-tab-view active space-y-6">
+            <div class="classroom-hub-hero">
+                <div class="classroom-hub-hero-text">
+                    <p class="eyebrow"><i data-lucide="graduation-cap" style="width: 14px; height: 14px; vertical-align: middle;"></i> Academic Classroom Portal</p>
+                    <h1 class="classroom-hub-heading">Choose Classroom Option</h1>
+                    <p class="page-copy">Explore your syllabus, active floated assignments, rapid 10s quizzes, overall academic mastery, and evaluated test results.</p>
+                </div>
+            </div>
+
+            <div class="mode-grid classroom-mode-cards-grid">
+                <!-- Option 1: Syllabus -->
+                <div class="mode-card classroom-choice-card first-highlight" onclick="switchClassroomTab('syllabus')">
+                    <i data-lucide="lightbulb"></i>
+                    <h2>Syllabus</h2>
+                    <p>Accredited course curriculum, breakdown of units, learning objectives, and real-time topic coverage for Data Structures & Algorithms.</p>
+                    <button class="secondary-btn" type="button" onclick="event.stopPropagation(); switchClassroomTab('syllabus')">Choose mode</button>
+                </div>
+
+                <!-- Option 2: Assignments -->
+                <div class="mode-card classroom-choice-card" onclick="switchClassroomTab('assignments')">
+                    <i data-lucide="message-square"></i>
+                    <h2>Assignments</h2>
+                    <p>Course problem sets floated by faculty Dr. Ananya Sharma with deadlines and direct material downloads from raw data/assignment/.</p>
+                    <button class="secondary-btn" type="button" onclick="event.stopPropagation(); switchClassroomTab('assignments')">Choose mode</button>
+                </div>
+
+                <!-- Option 3: Quizzes -->
+                <div class="mode-card classroom-choice-card" onclick="switchClassroomTab('quizzes')">
+                    <i data-lucide="zap"></i>
+                    <h2>Quizzes</h2>
+                    <p>Scheduled rapid quizzes featuring strict 10-second timers, conceptual & calculation variety, and automated progression.</p>
+                    <button class="secondary-btn" type="button" onclick="event.stopPropagation(); switchClassroomTab('quizzes')">Choose mode</button>
+                </div>
+
+                <!-- Option 4: Whole Progress -->
+                <div class="mode-card classroom-choice-card" onclick="switchClassroomTab('progress')">
+                    <i data-lucide="map"></i>
+                    <h2>Whole Progress</h2>
+                    <p>Comprehensive academic mastery metrics, total topics completed, study hours logged, and subject-by-subject distribution.</p>
+                    <button class="secondary-btn" type="button" onclick="event.stopPropagation(); switchClassroomTab('progress')">Choose mode</button>
+                </div>
+
+                <!-- Option 5: Quiz Result -->
+                <div class="mode-card classroom-choice-card" onclick="switchClassroomTab('results')">
+                    <i data-lucide="award"></i>
+                    <h2>Quiz Result</h2>
+                    <p>Itemized test evaluation history, score percentages, 10s pace adherence metrics, and teacher diagnostic feedback.</p>
+                    <button class="secondary-btn" type="button" onclick="event.stopPropagation(); switchClassroomTab('results')">Choose mode</button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ===============================================================
+             TAB 1: SYLLABUS
+        =============================================================== -->
+        <section id="classTab-syllabus" class="classroom-tab-view hidden space-y-6">
+            <div class="classroom-view-header-strip">
+                <button type="button" class="back-to-options-btn" onclick="switchClassroomTab('hub')">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Back to Options</span>
+                </button>
+                <div class="classroom-breadcrumb">
+                    <span>Classroom Hub</span>
+                    <i data-lucide="chevron-right"></i>
+                    <strong>Syllabus</strong>
+                </div>
+            </div>
+            <div class="classroom-panel-card">
+                <div class="classroom-panel-header">
+                    <div>
+                        <div class="flex-row-gap">
+                            <h3 class="panel-heading">Accredited Course Syllabus: Data Structures & Algorithms</h3>
+                            <span class="code-pill">Course Code: CS-201</span>
+                            <span class="credits-pill">4.0 Credits &bull; Semester III</span>
+                        </div>
+                        <p class="panel-subtext">Curriculum authorized by Dept of CSE. Topics updated in real-time by Dr. Ananya Sharma.</p>
+                    </div>
+                    <div class="syllabus-progress-stat">
+                        <span class="stat-number">72%</span>
+                        <span class="stat-label">Syllabus Covered</span>
+                    </div>
+                </div>
+
+                <!-- Syllabus Units Accordion -->
+                <div class="syllabus-units-grid" id="studentSyllabusContainer">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             TAB 2: ASSIGNMENTS
+        =============================================================== -->
+        <section id="classTab-assignments" class="classroom-tab-view hidden space-y-6">
+            <div class="classroom-view-header-strip">
+                <button type="button" class="back-to-options-btn" onclick="switchClassroomTab('hub')">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Back to Options</span>
+                </button>
+                <div class="classroom-breadcrumb">
+                    <span>Classroom Hub</span>
+                    <i data-lucide="chevron-right"></i>
+                    <strong>Assignments</strong>
+                </div>
+            </div>
+            <div class="classroom-panel-card">
+                <div class="classroom-panel-header">
+                    <div>
+                        <h3 class="panel-heading">Coursework & Floated Problem Sets</h3>
+                        <p class="panel-subtext">Assignments floated by faculty directly to CSE 2nd Year. Download problem sheets and review deadlines.</p>
+                    </div>
+                    <div class="flex-row-gap">
+                        <span class="info-pill"><i data-lucide="hard-drive"></i> Synced from raw data/assignment/</span>
+                    </div>
+                </div>
+
+                <div class="assignments-list-container" id="studentAssignmentsList">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             TAB 3: QUIZZES
+        =============================================================== -->
+        <section id="classTab-quizzes" class="classroom-tab-view hidden space-y-6">
+            <div class="classroom-view-header-strip">
+                <button type="button" class="back-to-options-btn" onclick="switchClassroomTab('hub')">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Back to Options</span>
+                </button>
+                <div class="classroom-breadcrumb">
+                    <span>Classroom Hub</span>
+                    <i data-lucide="chevron-right"></i>
+                    <strong>Quizzes</strong>
+                </div>
+            </div>
+            <div class="classroom-panel-card">
+                <div class="classroom-panel-header">
+                    <div>
+                        <h3 class="panel-heading">Scheduled & Diagnostic Quizzes</h3>
+                        <p class="panel-subtext">Quizzes scheduled by faculty for CSE 2nd Year with 10-second rapid retention timers.</p>
+                    </div>
+                    <div class="flex-row-gap">
+                        <span class="info-pill"><i data-lucide="zap"></i> Rapid 10s Timer Verified</span>
+                    </div>
+                </div>
+
+                <div class="quizzes-grid-container" id="studentQuizzesList">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             TAB 4: WHOLE PROGRESS
+        =============================================================== -->
+        <section id="classTab-progress" class="classroom-tab-view hidden space-y-6">
+            <div class="classroom-view-header-strip">
+                <button type="button" class="back-to-options-btn" onclick="switchClassroomTab('hub')">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Back to Options</span>
+                </button>
+                <div class="classroom-breadcrumb">
+                    <span>Classroom Hub</span>
+                    <i data-lucide="chevron-right"></i>
+                    <strong>Whole Progress</strong>
+                </div>
+            </div>
+            <!-- 4 Metric Cards -->
+            <div class="classroom-metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-label">Overall Academic Mastery</span>
+                    <span class="metric-value">84.5%</span>
+                    <span class="metric-hint positive"><i data-lucide="arrow-up-right"></i> +6.2% this month</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Topics Studied</span>
+                    <span class="metric-value">42 Topics</span>
+                    <span class="metric-hint">Across 4 Computer Science Modules</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Study Time Logged</span>
+                    <span class="metric-value">38.4 Hours</span>
+                    <span class="metric-hint">Active learning in Prashiksha</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Faculty Diagnostic Status</span>
+                    <span class="metric-value text-emerald">Exemplary</span>
+                    <span class="metric-hint">Top 5% of CSE 2nd Year</span>
+                </div>
+            </div>
+
+            <!-- Subject-by-Subject Breakdown -->
+            <div class="classroom-panel-card">
+                <h3 class="panel-heading mb-4">Subject-Categorized Mastery & Topic Distribution</h3>
+                <div class="subject-progress-grid" id="studentSubjectProgressGrid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             TAB 5: QUIZ RESULT
+        =============================================================== -->
+        <section id="classTab-results" class="classroom-tab-view hidden space-y-6">
+            <div class="classroom-view-header-strip">
+                <button type="button" class="back-to-options-btn" onclick="switchClassroomTab('hub')">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Back to Options</span>
+                </button>
+                <div class="classroom-breadcrumb">
+                    <span>Classroom Hub</span>
+                    <i data-lucide="chevron-right"></i>
+                    <strong>Quiz Result</strong>
+                </div>
+            </div>
+            <div class="classroom-panel-card">
+                <div class="classroom-panel-header">
+                    <div>
+                        <h3 class="panel-heading">Evaluated Quiz Results & Performance History</h3>
+                        <p class="panel-subtext">Itemized breakdown of attempts, scores, answer accuracy, and teacher diagnostic feedback.</p>
+                    </div>
+                    <div class="overall-score-pill">
+                        <span class="score-val">92.4%</span>
+                        <span class="score-lbl">Average Score</span>
+                    </div>
+                </div>
+
+                <div class="results-table-card">
+                    <table class="classroom-table">
+                        <thead>
+                            <tr>
+                                <th>Quiz Name & Category</th>
+                                <th>Date & Time</th>
+                                <th>Score</th>
+                                <th>Accuracy</th>
+                                <th>Timer Adherence</th>
+                                <th>Evaluation Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentQuizResultsTable">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>
+
 {% endblock %}
