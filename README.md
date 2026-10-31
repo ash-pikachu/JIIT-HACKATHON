@@ -1,4 +1,4 @@
-# 🎓 AI Tutor Hub
+# 🎓 Prashiksha
 
 An adaptive AI learning companion that teaches any topic using personalized content,
 multilingual support, flashcard quizzes, voice narration, and persistent MySQL storage.
@@ -176,10 +176,6 @@ Use the `get_response()` method in `agent.py` — inject API results into the pr
 
 ---
 
-## 🏆 Hackathon Tips
-
-- **Start demo**: Run without MySQL first (demo mode works out of the box)
-- **Free tier**: Gemini 1.5 Flash has generous free limits — perfect for hackathons
 - **Judges love**: Show the adaptive re-teach flow — it's the most impressive feature
 - **Deploy**: Use Streamlit Cloud (free) + PlanetScale (free MySQL) for a live demo
 
