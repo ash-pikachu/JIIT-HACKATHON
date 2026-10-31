@@ -158,10 +158,6 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 response = client.chat.completions.create(model="gpt-4o", messages=[...])
 ```
 
-### Add external APIs (Wikipedia, YouTube, Khan Academy)
-Use the `get_response()` method in `agent.py` — inject API results into the prompt before sending to the LLM.
-
----
 
 ## 📊 Database Schema
 
