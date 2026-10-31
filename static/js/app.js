@@ -1758,55 +1758,210 @@ const studentClassroomData = {
         topicsStudied: 42,
         studyHours: "38.4 Hours"
     },
-    syllabus: {
-        course: "Data Structures & Algorithms",
-        code: "CS-201",
-        credits: "4.0 Credits",
-        term: "Semester III • Academic Year 2026-27",
-        units: [
-            {
-                unitNumber: 1,
-                title: "Linear Data Structures & Algorithmic Complexity",
-                hours: "8 Hours",
-                topics: [
-                    { name: "Asymptotic Analysis (Big-O, Omega, Theta) & Master Theorem", status: "Covered", date: "Sep 04, 2026", mastery: 91 },
-                    { name: "Dynamic Arrays, Vectors & Amortized Complexity Analysis", status: "Covered", date: "Sep 11, 2026", mastery: 88 },
-                    { name: "Singly, Doubly and Circular Linked Lists Implementation", status: "Covered", date: "Sep 18, 2026", mastery: 94 }
-                ]
-            },
-            {
-                unitNumber: 2,
-                title: "Stacks, Queues & Hash Table Collisions",
-                hours: "9 Hours",
-                topics: [
-                    { name: "Stack Applications: Infix to Postfix & Monotonic Stacks", status: "Covered", date: "Sep 25, 2026", mastery: 82 },
-                    { name: "Circular Queues, Deques & Priority Queue Heaps", status: "Covered", date: "Oct 02, 2026", mastery: 86 },
-                    { name: "Hash Functions, Separate Chaining & Open Addressing Probing", status: "Covered", date: "Oct 09, 2026", mastery: 80 }
-                ]
-            },
-            {
-                unitNumber: 3,
-                title: "Tree Structures, Binary Search Trees & AVL Balancing",
-                hours: "11 Hours",
-                topics: [
-                    { name: "Binary Tree Traversals (Inorder, Preorder, Postorder, Level-Order)", status: "Covered", date: "Oct 16, 2026", mastery: 89 },
-                    { name: "Binary Search Trees Operations (Search, Insert, Delete)", status: "Covered", date: "Oct 23, 2026", mastery: 85 },
-                    { name: "Self-Balancing AVL Trees (Rotations: LL, RR, LR, RL)", status: "In-Progress", date: "Oct 30, 2026", mastery: 74 },
-                    { name: "B-Trees & B+ Trees for Database Indexing", status: "Upcoming", date: "Scheduled", mastery: 0 }
-                ]
-            },
-            {
-                unitNumber: 4,
-                title: "Graph Algorithms & Shortest Path Paradigms",
-                hours: "10 Hours",
-                topics: [
-                    { name: "Graph Representations (Adjacency Matrix, Adjacency List)", status: "Upcoming", date: "Scheduled", mastery: 0 },
-                    { name: "Breadth-First Search (BFS) & Depth-First Search (DFS)", status: "Upcoming", date: "Scheduled", mastery: 0 },
-                    { name: "Dijkstra and Bellman-Ford Shortest Path Algorithms", status: "Upcoming", date: "Scheduled", mastery: 0 },
-                    { name: "Minimum Spanning Trees: Kruskal and Prim Algorithms", status: "Upcoming", date: "Scheduled", mastery: 0 }
-                ]
-            }
-        ]
+    syllabi: {
+        "CS-201": {
+            course: "Data Structures & Algorithms",
+            code: "CS-201",
+            credits: "4.0 Credits",
+            faculty: "Dr. Ananya Sharma",
+            term: "Semester III • Academic Year 2026-27",
+            coveredPercent: 72,
+            units: [
+                {
+                    unitNumber: 1,
+                    title: "Linear Data Structures & Algorithmic Complexity",
+                    hours: "8 Hours",
+                    topics: [
+                        { name: "Asymptotic Analysis (Big-O, Omega, Theta) & Master Theorem", status: "Covered", date: "Sep 04, 2026", mastery: 91 },
+                        { name: "Dynamic Arrays, Vectors & Amortized Complexity Analysis", status: "Covered", date: "Sep 11, 2026", mastery: 88 },
+                        { name: "Singly, Doubly and Circular Linked Lists Implementation", status: "Covered", date: "Sep 18, 2026", mastery: 94 }
+                    ]
+                },
+                {
+                    unitNumber: 2,
+                    title: "Stacks, Queues & Hash Table Collisions",
+                    hours: "9 Hours",
+                    topics: [
+                        { name: "Stack Applications: Infix to Postfix & Monotonic Stacks", status: "Covered", date: "Sep 25, 2026", mastery: 82 },
+                        { name: "Circular Queues, Deques & Priority Queue Heaps", status: "Covered", date: "Oct 02, 2026", mastery: 86 },
+                        { name: "Hash Functions, Separate Chaining & Open Addressing Probing", status: "Covered", date: "Oct 09, 2026", mastery: 80 }
+                    ]
+                },
+                {
+                    unitNumber: 3,
+                    title: "Tree Structures, Binary Search Trees & AVL Balancing",
+                    hours: "11 Hours",
+                    topics: [
+                        { name: "Binary Tree Traversals (Inorder, Preorder, Postorder, Level-Order)", status: "Covered", date: "Oct 16, 2026", mastery: 89 },
+                        { name: "Binary Search Trees Operations (Search, Insert, Delete)", status: "Covered", date: "Oct 23, 2026", mastery: 85 },
+                        { name: "Self-Balancing AVL Trees (Rotations: LL, RR, LR, RL)", status: "In-Progress", date: "Oct 30, 2026", mastery: 74 },
+                        { name: "B-Trees & B+ Trees for Database Indexing", status: "Upcoming", date: "Scheduled", mastery: 0 }
+                    ]
+                },
+                {
+                    unitNumber: 4,
+                    title: "Graph Algorithms & Shortest Path Paradigms",
+                    hours: "10 Hours",
+                    topics: [
+                        { name: "Graph Representations (Adjacency Matrix, Adjacency List)", status: "Upcoming", date: "Scheduled", mastery: 0 },
+                        { name: "Breadth-First Search (BFS) & Depth-First Search (DFS)", status: "Upcoming", date: "Scheduled", mastery: 0 },
+                        { name: "Dijkstra and Bellman-Ford Shortest Path Algorithms", status: "Upcoming", date: "Scheduled", mastery: 0 },
+                        { name: "Minimum Spanning Trees: Kruskal and Prim Algorithms", status: "Upcoming", date: "Scheduled", mastery: 0 }
+                    ]
+                }
+            ]
+        },
+        "CS-202": {
+            course: "Operating Systems & Architecture",
+            code: "CS-202",
+            credits: "4.0 Credits",
+            faculty: "Prof. Vikram Malhotra",
+            term: "Semester III • Academic Year 2026-27",
+            coveredPercent: 65,
+            units: [
+                {
+                    unitNumber: 1,
+                    title: "Operating System Foundations & Process Management",
+                    hours: "8 Hours",
+                    topics: [
+                        { name: "Kernel vs User Mode, System Calls & Dual-Mode Operation", status: "Covered", date: "Sep 06, 2026", mastery: 90 },
+                        { name: "Process Control Block (PCB), Context Switching & fork() / exec()", status: "Covered", date: "Sep 13, 2026", mastery: 86 },
+                        { name: "Inter-Process Communication: Pipes, Shared Memory & Message Queues", status: "Covered", date: "Sep 20, 2026", mastery: 84 }
+                    ]
+                },
+                {
+                    unitNumber: 2,
+                    title: "CPU Scheduling Algorithms & POSIX Threads",
+                    hours: "10 Hours",
+                    topics: [
+                        { name: "Preemptive & Non-Preemptive Scheduling (FCFS, SJF, SRTF, RR)", status: "Covered", date: "Sep 27, 2026", mastery: 92 },
+                        { name: "Multi-Level Feedback Queues & Real-Time Scheduling", status: "Covered", date: "Oct 04, 2026", mastery: 85 },
+                        { name: "Multithreading Models & POSIX Pthreads Synchronization", status: "In-Progress", date: "Oct 11, 2026", mastery: 76 }
+                    ]
+                },
+                {
+                    unitNumber: 3,
+                    title: "Process Synchronization & Deadlock Handling",
+                    hours: "11 Hours",
+                    topics: [
+                        { name: "Critical Section Problem, Mutex Locks & Peterson's Algorithm", status: "In-Progress", date: "Oct 18, 2026", mastery: 72 },
+                        { name: "Counting Semaphores & Classical IPC (Producer-Consumer, Dining Philosophers)", status: "Upcoming", date: "Scheduled", mastery: 0 },
+                        { name: "Deadlock Detection, Prevention & Banker's Resource Allocation Algorithm", status: "Upcoming", date: "Scheduled", mastery: 0 }
+                    ]
+                },
+                {
+                    unitNumber: 4,
+                    title: "Memory Management & Virtual Memory Demand Paging",
+                    hours: "11 Hours",
+                    topics: [
+                        { name: "Contiguous Memory Allocation, Fragmentation & Paging Hardware MMU", status: "Upcoming", date: "Scheduled", mastery: 0 },
+                        { name: "Demand Paging, Inverted Page Tables & TLB Translation", status: "Upcoming", date: "Scheduled", mastery: 0 },
+                        { name: "Page Replacement Algorithms: FIFO, Optimal & LRU Clock", status: "Upcoming", date: "Scheduled", mastery: 0 },
+                        { name: "Thrashing Dynamics & Working Set Model Analysis", status: "Upcoming", date: "Scheduled", mastery: 0 }
+                    ]
+                }
+            ]
+        },
+        "CS-203": {
+            course: "Database Management Systems",
+            code: "CS-203",
+            credits: "4.0 Credits",
+            faculty: "Prof. Rajesh Verma",
+            term: "Semester III • Academic Year 2026-27",
+            coveredPercent: 80,
+            units: [
+                {
+                    unitNumber: 1,
+                    title: "Relational Data Modeling & Relational Algebra",
+                    hours: "8 Hours",
+                    topics: [
+                        { name: "Entity-Relationship (ER) & Enhanced ER Diagram Modeling", status: "Covered", date: "Sep 08, 2026", mastery: 95 },
+                        { name: "Relational Algebra: Selection, Projection, Cartesian Product & Joins", status: "Covered", date: "Sep 15, 2026", mastery: 92 },
+                        { name: "Tuple & Domain Relational Calculus Formal Querying", status: "Covered", date: "Sep 22, 2026", mastery: 87 }
+                    ]
+                },
+                {
+                    unitNumber: 2,
+                    title: "Advanced SQL, Complex Queries & Integrity Constraints",
+                    hours: "9 Hours",
+                    topics: [
+                        { name: "Correlated Subqueries, Common Table Expressions (CTEs) & Joins", status: "Covered", date: "Sep 29, 2026", mastery: 94 },
+                        { name: "SQL Window Functions: RANK(), DENSE_RANK(), OVER & Partitioning", status: "Covered", date: "Oct 06, 2026", mastery: 88 },
+                        { name: "Database Triggers, Stored Procedures & Views Optimization", status: "Covered", date: "Oct 13, 2026", mastery: 84 }
+                    ]
+                },
+                {
+                    unitNumber: 3,
+                    title: "Relational Schema Design & Normalization Theory",
+                    hours: "10 Hours",
+                    topics: [
+                        { name: "Functional Dependencies & Armstrong's Inference Axioms", status: "Covered", date: "Oct 20, 2026", mastery: 90 },
+                        { name: "1NF, 2NF, 3NF & Boyce-Codd Normal Form (BCNF) Decompositions", status: "Covered", date: "Oct 27, 2026", mastery: 86 },
+                        { name: "Lossless Join Decomposition & Dependency Preservation Verification", status: "In-Progress", date: "Oct 31, 2026", mastery: 75 }
+                    ]
+                },
+                {
+                    unitNumber: 4,
+                    title: "Transactions, Concurrency Control & Crash Recovery",
+                    hours: "9 Hours",
+                    topics: [
+                        { name: "ACID Transaction Properties & Serializability Testing Graphs", status: "In-Progress", date: "Scheduled", mastery: 70 },
+                        { name: "Two-Phase Locking (2PL), Strict 2PL & Timestamp Ordering Protocols", status: "Upcoming", date: "Scheduled", mastery: 0 },
+                        { name: "ARIES Log-Based Recovery, Checkpointing & WAL (Write-Ahead Logging)", status: "Upcoming", date: "Scheduled", mastery: 0 }
+                    ]
+                }
+            ]
+        },
+        "CS-204": {
+            course: "Natural Sciences & Computational AI",
+            code: "CS-204",
+            credits: "3.0 Credits",
+            faculty: "Dr. Sneha Rao",
+            term: "Semester III • Academic Year 2026-27",
+            coveredPercent: 85,
+            units: [
+                {
+                    unitNumber: 1,
+                    title: "Foundations of Mathematical AI & Probabilistic Reasoning",
+                    hours: "7 Hours",
+                    topics: [
+                        { name: "Conditional Probability, Bayes' Theorem & Naive Bayes Classification", status: "Covered", date: "Sep 10, 2026", mastery: 96 },
+                        { name: "Information Entropy, Gini Impurity & Decision Tree Induction", status: "Covered", date: "Sep 17, 2026", mastery: 92 },
+                        { name: "Linear Algebra: Principal Component Analysis (PCA) & SVD", status: "Covered", date: "Sep 24, 2026", mastery: 89 }
+                    ]
+                },
+                {
+                    unitNumber: 2,
+                    title: "Machine Learning Algorithms & Gradient Optimization",
+                    hours: "9 Hours",
+                    topics: [
+                        { name: "Linear & Logistic Regression with Stochastic Gradient Descent", status: "Covered", date: "Oct 01, 2026", mastery: 94 },
+                        { name: "Regularization (L1 Lasso, L2 Ridge) & Bias-Variance Tradeoff", status: "Covered", date: "Oct 08, 2026", mastery: 90 },
+                        { name: "Support Vector Machines (SVM) & Kernel Radial Basis Functions", status: "Covered", date: "Oct 15, 2026", mastery: 88 }
+                    ]
+                },
+                {
+                    unitNumber: 3,
+                    title: "Deep Learning & Neural Network Representations",
+                    hours: "10 Hours",
+                    topics: [
+                        { name: "Multilayer Perceptrons, Activation Functions & Backpropagation", status: "Covered", date: "Oct 22, 2026", mastery: 93 },
+                        { name: "Convolutional Neural Networks (CNNs) & Feature Extraction Filters", status: "In-Progress", date: "Oct 29, 2026", mastery: 81 },
+                        { name: "Recurrent Neural Networks (RNNs) & Long Short-Term Memory (LSTM)", status: "Upcoming", date: "Scheduled", mastery: 0 }
+                    ]
+                },
+                {
+                    unitNumber: 4,
+                    title: "Transformer Architectures & Generative AI Agents",
+                    hours: "8 Hours",
+                    topics: [
+                        { name: "Scaled Dot-Product Attention & Multi-Head Self-Attention", status: "In-Progress", date: "Oct 31, 2026", mastery: 78 },
+                        { name: "Large Language Models Pre-training & Instruction Fine-Tuning", status: "Upcoming", date: "Scheduled", mastery: 0 },
+                        { name: "Autonomous Agent Tool Calling & Grounding with Gemini Models", status: "Upcoming", date: "Scheduled", mastery: 0 }
+                    ]
+                }
+            ]
+        }
     },
     assignments: [
         {
@@ -1991,38 +2146,108 @@ function switchClassroomTab(tabName) {
     }
 }
 
-function renderStudentSyllabus() {
-    const container = document.getElementById("studentSyllabusContainer");
-    if (!container) return;
+let currentSyllabusSubjectCode = "CS-201";
 
-    container.innerHTML = studentClassroomData.syllabus.units.map(unit => `
-        <div class="syllabus-unit-box">
-            <div class="syllabus-unit-title-bar">
-                <div class="flex-row-gap">
-                    <span class="unit-badge">Unit ${unit.unitNumber}</span>
-                    <span class="unit-title-text">${unit.title}</span>
+function selectSyllabusSubject(code) {
+    currentSyllabusSubjectCode = code;
+    renderStudentSyllabus();
+}
+
+function renderStudentSyllabus() {
+    const tabsContainer = document.getElementById("syllabusSubjectTabsGrid");
+    const panelContainer = document.getElementById("studentSyllabusPanel");
+    if (!panelContainer) return;
+
+    const subjectsList = [
+        { code: "CS-201", name: "Data Structures & Algorithms", faculty: "Dr. Ananya Sharma", covered: 72, credits: "4.0 Credits" },
+        { code: "CS-202", name: "Operating Systems & Architecture", faculty: "Prof. Vikram Malhotra", covered: 65, credits: "4.0 Credits" },
+        { code: "CS-203", name: "Database Management Systems", faculty: "Prof. Rajesh Verma", covered: 80, credits: "4.0 Credits" },
+        { code: "CS-204", name: "Natural Sciences & Computational AI", faculty: "Dr. Sneha Rao", covered: 85, credits: "3.0 Credits" }
+    ];
+
+    // Render Subject Selector Tabs
+    if (tabsContainer) {
+        tabsContainer.innerHTML = subjectsList.map(subj => {
+            const isActive = subj.code === currentSyllabusSubjectCode;
+            return `
+                <div class="subject-tab-pill ${isActive ? 'active' : ''}" onclick="selectSyllabusSubject('${subj.code}')">
+                    <div class="subj-tab-top-row">
+                        <span class="subj-tab-code">${subj.code}</span>
+                        <span class="subj-tab-cov">${subj.covered}% Covered</span>
+                    </div>
+                    <div class="subj-tab-name">${subj.name}</div>
+                    <div class="subj-tab-meta">Faculty: ${subj.faculty}</div>
+                    <div class="subj-tab-progress-bar">
+                        <div class="subj-tab-progress-fill" style="width: ${subj.covered}%;"></div>
+                    </div>
                 </div>
-                <span class="credits-pill">${unit.hours}</span>
+            `;
+        }).join('');
+    }
+
+    // Retrieve active syllabus
+    const curSyllabus = (studentClassroomData.syllabi && studentClassroomData.syllabi[currentSyllabusSubjectCode]) 
+        ? studentClassroomData.syllabi[currentSyllabusSubjectCode] 
+        : (studentClassroomData.syllabi ? studentClassroomData.syllabi["CS-201"] : null);
+
+    if (!curSyllabus) return;
+
+    // Render active subject syllabus
+    panelContainer.innerHTML = `
+        <div class="classroom-panel-header">
+            <div>
+                <div class="flex-row-gap">
+                    <h3 class="panel-heading">Accredited Course Syllabus: ${curSyllabus.course}</h3>
+                    <span class="code-pill">Course Code: ${curSyllabus.code}</span>
+                    <span class="credits-pill">${curSyllabus.credits} &bull; Semester III</span>
+                </div>
+                <p class="panel-subtext">Curriculum authorized by Dept of CSE. Topics updated in real-time by ${curSyllabus.faculty}.</p>
             </div>
-            <div class="unit-topics-list">
-                ${unit.topics.map(topic => {
-                    let pillClass = "topic-status-pill upcoming";
-                    if (topic.status === "Covered") pillClass = "topic-status-pill covered";
-                    else if (topic.status === "In-Progress") pillClass = "topic-status-pill in-progress";
-                    return `
-                        <div class="student-topic-row">
-                            <div>
-                                <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${topic.name}</div>
-                                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Date: ${topic.date} • Mastery Target: ${topic.mastery}%</div>
-                            </div>
-                            <span class="${pillClass}">${topic.status}</span>
-                        </div>
-                    `;
-                }).join('')}
+            <div class="syllabus-progress-stat">
+                <span class="stat-number">${curSyllabus.coveredPercent}%</span>
+                <span class="stat-label">Syllabus Covered</span>
             </div>
         </div>
-    `).join('');
+
+        <div class="syllabus-units-grid">
+            ${curSyllabus.units.map(unit => `
+                <div class="syllabus-unit-box">
+                    <div class="syllabus-unit-title-bar">
+                        <div class="flex-row-gap">
+                            <span class="unit-badge">Unit ${unit.unitNumber}</span>
+                            <span class="unit-title-text">${unit.title}</span>
+                        </div>
+                        <span class="credits-pill">${unit.hours}</span>
+                    </div>
+                    <div class="unit-topics-list">
+                        ${unit.topics.map(topic => {
+                            let pillClass = "topic-status-pill upcoming";
+                            if (topic.status === "Covered") pillClass = "topic-status-pill covered";
+                            else if (topic.status === "In-Progress") pillClass = "topic-status-pill in-progress";
+                            return `
+                                <div class="student-topic-row">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <i data-lucide="${topic.status === 'Covered' ? 'check-circle-2' : (topic.status === 'In-Progress' ? 'clock' : 'circle')}" style="width: 16px; height: 16px; color: ${topic.status === 'Covered' ? '#059669' : (topic.status === 'In-Progress' ? '#d97706' : '#94a3b8')};"></i>
+                                        <div>
+                                            <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${topic.name}</div>
+                                            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Schedule: ${topic.date} • Mastery Target: ${topic.mastery}%</div>
+                                        </div>
+                                    </div>
+                                    <span class="${pillClass}">${topic.status}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+    }
 }
+
 
 function renderStudentAssignments() {
     const container = document.getElementById("studentAssignmentsList");

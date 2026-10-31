@@ -5367,3 +5367,143 @@ textarea:focus {
     height: 14px;
     color: #94a3b8;
 }
+
+/* ==========================================================================
+   SYLLABUS SUBJECT SELECTOR
+   ========================================================================== */
+.syllabus-subject-selector-card {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 20px 24px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+    margin-bottom: 20px;
+}
+
+.syllabus-subject-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.syllabus-subject-select-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    font-family: 'Outfit', sans-serif;
+    margin: 2px 0 0;
+}
+
+.syllabus-subject-tabs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 12px;
+}
+
+.subject-tab-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.subject-tab-pill:hover {
+    background: #ffffff;
+    border-color: #94a3b8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+}
+
+.subject-tab-pill.active {
+    background: #000000;
+    border-color: #000000;
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.subject-tab-pill.active .subj-tab-code {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.subject-tab-pill.active .subj-tab-name {
+    color: #ffffff;
+}
+
+.subject-tab-pill.active .subj-tab-meta {
+    color: #cbd5e1;
+}
+
+.subject-tab-pill.active .subj-tab-progress-bar {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.subject-tab-pill.active .subj-tab-progress-fill {
+    background: #FFAB00;
+}
+
+.subj-tab-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+.subj-tab-code {
+    font-size: 11px;
+    font-weight: 800;
+    font-family: monospace;
+    background: #e2e8f0;
+    color: #0f172a;
+    padding: 2px 7px;
+    border-radius: 6px;
+}
+
+.subj-tab-cov {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #059669;
+}
+.subject-tab-pill.active .subj-tab-cov {
+    color: #34d399;
+}
+
+.subj-tab-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.3;
+    margin-bottom: 4px;
+}
+
+.subj-tab-meta {
+    font-size: 11.5px;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.subj-tab-progress-bar {
+    width: 100%;
+    height: 5px;
+    background: #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.subj-tab-progress-fill {
+    height: 100%;
+    background: #2563eb;
+    border-radius: 9999px;
+    transition: width 0.4s ease;
+}

@@ -399,7 +399,7 @@
         </section>
         
         <!-- ===============================================================
-             TAB 1: SYLLABUS
+             TAB 1: SYLLABUS (SUBJECT-TYPE CURRICULUM SELECTION)
         =============================================================== -->
         <section id="classTab-syllabus" class="classroom-tab-view hidden space-y-6">
             <div class="classroom-view-header-strip">
@@ -410,29 +410,27 @@
                 <div class="classroom-breadcrumb">
                     <span>Classroom Hub</span>
                     <i data-lucide="chevron-right"></i>
-                    <strong>Syllabus</strong>
+                    <strong>Syllabus by Subject</strong>
                 </div>
             </div>
-            <div class="classroom-panel-card">
-                <div class="classroom-panel-header">
-                    <div>
-                        <div class="flex-row-gap">
-                            <h3 class="panel-heading">Accredited Course Syllabus: Data Structures & Algorithms</h3>
-                            <span class="code-pill">Course Code: CS-201</span>
-                            <span class="credits-pill">4.0 Credits &bull; Semester III</span>
-                        </div>
-                        <p class="panel-subtext">Curriculum authorized by Dept of CSE. Topics updated in real-time by Dr. Ananya Sharma.</p>
-                    </div>
-                    <div class="syllabus-progress-stat">
-                        <span class="stat-number">72%</span>
-                        <span class="stat-label">Syllabus Covered</span>
-                    </div>
-                </div>
 
-                <!-- Syllabus Units Accordion -->
-                <div class="syllabus-units-grid" id="studentSyllabusContainer">
+            <!-- Subject Selector Grid -->
+            <div class="syllabus-subject-selector-card">
+                <div class="syllabus-subject-header-row">
+                    <div>
+                        <span class="eyebrow"><i data-lucide="layers" style="width: 14px; height: 14px; vertical-align: middle;"></i> Enrolled Coursework</span>
+                        <h3 class="syllabus-subject-select-title">Choose Subject to View Syllabus</h3>
+                    </div>
+                    <span class="info-pill"><i data-lucide="graduation-cap"></i> CSE 2nd Year &bull; Semester III</span>
+                </div>
+                <div class="syllabus-subject-tabs-grid" id="syllabusSubjectTabsGrid">
                     <!-- Populated dynamically via JS -->
                 </div>
+            </div>
+
+            <!-- Active Subject Syllabus Content -->
+            <div class="classroom-panel-card" id="studentSyllabusPanel">
+                <!-- Populated dynamically via JS according to selected subject -->
             </div>
         </section>
 
